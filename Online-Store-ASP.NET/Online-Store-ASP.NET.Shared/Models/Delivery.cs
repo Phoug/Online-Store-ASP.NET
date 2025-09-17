@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Online_Store_ASP.NET.Shared.Models
+﻿namespace Online_Store_ASP.NET.Shared.Models
 {
-    internal class Delivery
+    public class Delivery
     {
+        public int Id { get; set; }
+        public string Address { get; set; } = string.Empty;
+        public string DeliveryMethod { get; set; } = string.Empty;
+        public decimal DeliveryCost { get; set; }
+        public DateTime startDate { get; set; }
+        public DateTime endDate { get; set; }
     }
 }
