@@ -1,0 +1,65 @@
+# Папки Visual Studio
+.vs/
+*.user
+*.suo
+
+# Результаты сборки
+bin/
+obj/
+out/
+
+# Папки тестов
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# Пакеты NuGet
+*.nupkg
+*.snupkg
+packages/
+# Автоматически восстанавливаемые пакеты
+**/packages/*
+
+# Логи
+*.log
+
+# Папки публикации
+publish/
+wwwroot/dist/
+wwwroot/node_modules/
+
+# Конфиги, которые могут содержать секреты
+appsettings.*.local.json
+secrets.json
+
+# Rider / JetBrains
+.idea/
+
+# VS Code
+.vscode/
+
+# Кэш
+*.cache
+*.tmp
+*.temp
+
+# Системные файлы
+Thumbs.db
+ehthumbs.db
+.DS_Store
+Icon?
+desktop.ini
+
+# Node.js (если используешь npm/yarn для фронтенда)
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Папки миграций EF Core (если не хочешь хранить их в репо)
+#migrations/
+
+# PWA / Blazor специфичное
+wwwroot/service-worker-assets.js
+wwwroot/service-worker.js
