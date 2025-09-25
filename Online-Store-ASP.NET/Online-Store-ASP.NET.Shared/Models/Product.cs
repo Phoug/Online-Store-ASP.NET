@@ -1,23 +1,70 @@
 ﻿namespace Online_Store_ASP.NET.Shared.Models
 {
+    /// <summary>
+    /// Fields: Id, Article, Name, Description, Price, MediaUrls, Categories, OrderProducts, CartProducts, WishlistProducts, ReviewsList
+    /// </summary>
     public class Product
     {
-        // PK
+        /// <summary>
+        /// Unique identifier (primary key).
+        /// </summary>
         public int Id { get; set; }
 
-        // Название товара
+        /// <summary>
+        /// Unique article code for convenient search.
+        /// </summary>
+        public string Article { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Name of the product.
+        /// </summary>
         public string Name { get; set; } = string.Empty;
 
-        // Описание товара
+        /// <summary>
+        /// Description of the product.
+        /// </summary>
         public string Description { get; set; } = string.Empty;
 
-        // Цена товара
+        /// <summary>
+        /// Price of the product.
+        /// </summary>
         public decimal Price { get; set; }
 
-        // Ссылки на фото/видео товара
-        public string ImageUrl { get; set; } = string.Empty;
+        /// <summary>
+        /// List of URLs to product photos or videos.
+        /// </summary>
+        public List<string> MediaUrls { get; set; } = new List<string>();
 
-        // Количество товаров в наличии
-        public int StockQuantity { get; set; }
+        /// <summary>
+        /// Collection of categories this product belongs to.
+        /// Many-to-many relationship between Product and Category.
+        /// </summary>
+        public virtual ICollection<Category> Categories { get; set; } = new List<Category>();
+
+        /// <summary>
+        /// Collection of order items that include this product.
+        /// One-to-many relationship: one Product can appear in many OrderItems.
+        /// </summary>
+        public virtual ICollection<OrderProduct> OrderProducts { get; set; } = new List<OrderProduct>();
+
+        /// <summary>
+        /// Collection of cart items that include this product.
+        /// One-to-many relationship: one Product can appear in many CartItems.
+        /// </summary>
+        public virtual ICollection<CartProduct> CartProducts { get; set; } = new List<CartProduct>();
+
+        /// <summary>
+        /// Collection of wishlist items that include this product.
+        /// One-to-many relationship: one Product can appear in many WishlistItems.
+        /// </summary>
+        public virtual ICollection<WishlistProduct> WishlistProducts { get; set; } = new List<WishlistProduct>();
+
+        /// <summary>
+        /// Collection of reviews written for this product.
+        /// One-to-many relationship: one Product can have many reviews.
+        /// </summary>
+        public virtual ICollection<Review> ReviewsList { get; set; } = new List<Review>();
+
     }
+
 }
