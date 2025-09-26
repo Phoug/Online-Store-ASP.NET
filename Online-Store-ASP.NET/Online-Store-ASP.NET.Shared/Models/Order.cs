@@ -22,7 +22,7 @@ namespace Online_Store_ASP.NET.Shared.Models
             get
             {
                 decimal total = 0;
-                foreach (var item in OrderProducts)
+                foreach (var item in OrderItems)
                 {
                     total += item.Quantity * item.Product.Price;
                 }
@@ -60,7 +60,7 @@ namespace Online_Store_ASP.NET.Shared.Models
         /// <summary>
         /// Foreign key to the Delivery details for this order.
         /// </summary>.
-        public int? DeliveryId { get; set; }
+        public int DeliveryId { get; set; }
 
         /// <summary>
         /// Related delivery details for this order.
@@ -72,6 +72,6 @@ namespace Online_Store_ASP.NET.Shared.Models
         /// Collection of order items in this order.
         /// One-to-many relationship: one Order can have many OrderItems.
         /// </summary>
-        public virtual ICollection<OrderProduct> OrderProducts { get; set; } = [];
+        public virtual ICollection<OrderItem> OrderItems { get; set; } = [];
     }
 }

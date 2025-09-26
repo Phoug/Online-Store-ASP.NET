@@ -1,44 +1,43 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Online_Store_ASP.NET.Shared.Models
 {
     /// <summary>
-    /// Fields: Id, Quantity, TotalPrice, OrderId, Order, ProductId, Product
+    ///  Fields: Id, Quantity, TotalPrice, CartId, Cart, ProductId, Product
     /// </summary>
-    public class OrderProduct
+    public class CartItem
     {
         /// <summary>
-        /// Primary key for the OrderItem.
+        /// Primary key for the CartProduct.
         /// </summary>
         [Key]
         public int Id { get; set; }
 
         /// <summary>
-        /// Quantity of this product in the order.
+        /// Quantity of this product in the cart.
         /// </summary>
         [Required]
         public int Quantity { get; set; } = 1;
 
         /// <summary>
-        /// Total price for this order item (Quantity * Product Price).
+        /// Calculates the total price for this item (Quantity * Product Price)
         /// </summary>
         [NotMapped]
         public decimal TotalPrice => Product != null ? Quantity * Product.Price : 0;
 
         /// <summary>
-        /// Foreign key to the Order.
+        /// Foreign key to the Cart.
         /// </summary>
         [Required]
-        public int OrderId { get; set; }
+        public int CartId { get; set; }
 
         /// <summary>
-        /// Navigation property to the Order.
-        /// One-to-many relationship: one Order can have many OrderItems.
+        /// Navigation property to the Cart.
+        /// One-to-many relationship: one Cart can have many CartItems.
         /// </summary>
-        [ForeignKey("OrderId")]
-        public virtual Order Order { get; set; } = null!;
+        [ForeignKey("CartId")]
+        public required virtual Cart Cart { get; set; }
 
         /// <summary>
         /// Foreign key to the Product.
@@ -48,9 +47,9 @@ namespace Online_Store_ASP.NET.Shared.Models
 
         /// <summary>
         /// Navigation property to the Product.
-        /// One-to-many relationship: one Product can appear in many OrderItems.
+        /// One-to-many relationship: one Product can appear in many CartItems.
         /// </summary>
         [ForeignKey("ProductId")]
-        public virtual Product Product { get; set; } = null!;
+        public virtual Product Product { get; set; } = new Product();
     }
 }

@@ -45,19 +45,19 @@
         /// Collection of order items that include this product.
         /// One-to-many relationship: one Product can appear in many OrderItems.
         /// </summary>
-        public virtual ICollection<OrderProduct> OrderProducts { get; set; } = new List<OrderProduct>();
+        public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 
         /// <summary>
         /// Collection of cart items that include this product.
         /// One-to-many relationship: one Product can appear in many CartItems.
         /// </summary>
-        public virtual ICollection<CartProduct> CartProducts { get; set; } = new List<CartProduct>();
+        public virtual ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
 
         /// <summary>
         /// Collection of wishlist items that include this product.
         /// One-to-many relationship: one Product can appear in many WishlistItems.
         /// </summary>
-        public virtual ICollection<WishlistProduct> WishlistProducts { get; set; } = new List<WishlistProduct>();
+        public virtual ICollection<WishlistItem> WishlistItems { get; set; } = new List<WishlistItem>();
 
         /// <summary>
         /// Collection of reviews written for this product.

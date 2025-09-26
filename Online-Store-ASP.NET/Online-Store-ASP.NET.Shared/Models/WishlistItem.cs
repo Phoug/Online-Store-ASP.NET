@@ -6,7 +6,7 @@ namespace Online_Store_ASP.NET.Shared.Models
     /// <summary>
     /// Fields: Id, WishlistId, Wishlist, ProductId, Product, AddedAt
     /// </summary>
-    public class WishlistProduct
+    public class WishlistItem
     {
         [Key]
         public int Id { get; set; }

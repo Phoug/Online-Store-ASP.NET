@@ -13,7 +13,7 @@ namespace Online_Store_ASP.NET.Shared.Models
         /// <summary>
         /// Unique identifier (primary key).
         /// </summary>
-        public string Id { get; set; } = string.Empty;
+        public int Id { get; set; }
 
         /// <summary>
         /// Login name used for authentication.
@@ -56,29 +56,15 @@ namespace Online_Store_ASP.NET.Shared.Models
         public DateTime BirthDate { get; set; }
 
         /// <summary>
-        /// Foreign Key to the Cart.
-        /// </summary>
-        [Required]
-        public int CartId { get; set; }
-
-        /// <summary>
         /// Navigation property to the Cart.
         /// One-to-one relationship with Cart.
         /// </summary>
-        [ForeignKey("CartId")]
         public required virtual Cart Cart { get; set; }
-
-        /// <summary>
-        /// Foreign Key to the Wishlist.
-        /// </summary>
-        [Required]
-        public int WishlistId { get; set; }
 
         /// <summary>
         /// Navigation property to the Wishlist.
         /// One-to-one relationship with Wishlist.
         /// </summary>
-        [ForeignKey("WishlistId")]
         public required virtual Wishlist Wishlist { get; set; }
 
         /// <summary>

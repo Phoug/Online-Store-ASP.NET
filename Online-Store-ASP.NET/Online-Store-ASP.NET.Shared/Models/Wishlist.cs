@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Online_Store_ASP.NET.Shared.Models
 {
     /// <summary>
-    /// Fields: Id, UserId, User, WishlistProducts
+    /// Fields: Id, UserId, User, WishlistItems
     /// </summary>
     public class Wishlist
     {
@@ -25,13 +25,12 @@ namespace Online_Store_ASP.NET.Shared.Models
         /// <summary>
         /// Navigation property to the User who owns this wishlist.
         /// </summary>
-        [ForeignKey("UserId")]
         public required virtual User User { get; set; }
 
         /// <summary>
         /// Collection of products in the wishlist.
-        /// Many-to-many relationship via WishlistProduct.
+        /// One-to-Many
         /// </summary>
-        public virtual ICollection<WishlistProduct> WishlistProducts { get; set; } = new List<WishlistProduct>();
+        public virtual ICollection<WishlistItem> WishlistItems { get; set; } = new List<WishlistItem>();
     }
 }

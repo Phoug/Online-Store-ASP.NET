@@ -23,7 +23,7 @@ namespace Online_Store_ASP.NET.Shared.Models
             get
             {
                 decimal total = 0;
-                foreach (var item in CartProducts)
+                foreach (var item in CartItems)
                 {
                     total += item.Quantity * item.Product.Price;
                 }
@@ -41,13 +41,12 @@ namespace Online_Store_ASP.NET.Shared.Models
         /// Navigation property to the User who owns this cart.
         /// One-to-one relationship: one User has one Cart.
         /// </summary>
-        [ForeignKey("UserId")]
         public required virtual User User { get; set; }
 
         /// <summary>
         /// Collection of items in the cart.
         /// One-to-many relationship: one Cart can have many CartItems.
         /// </summary>
-        public virtual ICollection<CartProduct> CartProducts { get; set; } = [];
+        public virtual ICollection<CartItem> CartItems { get; set; } = [];
     }
 }
