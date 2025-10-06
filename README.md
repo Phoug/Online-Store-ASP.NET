@@ -45,18 +45,6 @@
 
 ---
 
-## ❔ Мокапы проекта:
-
-[Главный экран](mockups\main_page.png)
-
-[Информация о товаре](mockups\product_info.png)
-
-[Список категорий](mockups\category_widget.png)
-
-[Окно редактирования](mockups\edit_window.png)
-
----
-
 ## ⚙️ Запуск проекта
 
 1. **Клонировать репозиторий**
