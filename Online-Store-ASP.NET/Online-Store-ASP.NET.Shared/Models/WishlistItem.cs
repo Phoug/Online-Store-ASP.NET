@@ -9,6 +9,7 @@ namespace Online_Store_ASP.NET.Shared.Models
     public class WishlistItem
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         /// <summary>

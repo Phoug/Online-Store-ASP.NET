@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Online_Store_ASP.NET.Shared.Models
 {
@@ -10,6 +12,8 @@ namespace Online_Store_ASP.NET.Shared.Models
         /// <summary>
         /// Unique identifier (primary key).
         /// </summary>
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         /// <summary>

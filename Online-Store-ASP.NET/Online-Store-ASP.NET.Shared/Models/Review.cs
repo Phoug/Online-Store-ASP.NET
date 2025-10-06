@@ -13,6 +13,7 @@ namespace Online_Store_ASP.NET.Shared.Models
         /// Unique identifier (primary key).
         /// </summary>
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         /// <summary>

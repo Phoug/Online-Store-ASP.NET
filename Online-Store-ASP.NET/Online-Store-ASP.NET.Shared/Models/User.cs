@@ -13,21 +13,26 @@ namespace Online_Store_ASP.NET.Shared.Models
         /// <summary>
         /// Unique identifier (primary key).
         /// </summary>
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         /// <summary>
         /// Login name used for authentication.
         /// </summary>
+        [MaxLength(64)]
         public string Username { get; set; } = string.Empty;
 
         /// <summary>
         /// Full name of the user.
         /// </summary>
+        [MaxLength(64)]
         public string Name { get; set; } = string.Empty;
 
         /// <summary>
         /// Hashed password for secure authentication.
         /// </summary>
+        [MaxLength(64)]
         public string Password { get; set; } = string.Empty;
 
         /// <summary>

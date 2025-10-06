@@ -1,4 +1,7 @@
-﻿namespace Online_Store_ASP.NET.Shared.Models
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Online_Store_ASP.NET.Shared.Models
 {
     /// <summary>
     /// Fields: Id, Article, Name, Description, Price, MediaUrls, Categories, OrderProducts, CartProducts, WishlistProducts, ReviewsList
@@ -8,21 +11,26 @@
         /// <summary>
         /// Unique identifier (primary key).
         /// </summary>
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         /// <summary>
         /// Unique article code for convenient search.
         /// </summary>
+        [MaxLength(11)]
         public string Article { get; set; } = string.Empty;
 
         /// <summary>
         /// Name of the product.
         /// </summary>
+        [MaxLength(64)]
         public string Name { get; set; } = string.Empty;
 
         /// <summary>
         /// Description of the product.
         /// </summary>
+        [MaxLength(256)]
         public string Description { get; set; } = string.Empty;
 
         /// <summary>

@@ -11,6 +11,7 @@ namespace Online_Store_ASP.NET.Shared.Models
         /// Primary key for the Order.
         /// </summary>
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         /// <summary>

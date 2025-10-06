@@ -12,6 +12,7 @@ namespace Online_Store_ASP.NET.Shared.Models
         /// Primary key for the CartProduct.
         /// </summary>
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         /// <summary>

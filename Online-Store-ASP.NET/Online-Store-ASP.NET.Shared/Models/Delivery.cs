@@ -1,4 +1,7 @@
-﻿namespace Online_Store_ASP.NET.Shared.Models
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Online_Store_ASP.NET.Shared.Models
 {
     /// <summary>
     /// Fields: Id, Address, DeliveryMethod, DeliveryCost, StartDate, EndDate, OrderId, Order, UserId, User
@@ -8,6 +11,8 @@
         /// <summary>
         /// Unique identifier for the delivery.
         /// </summary>
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         /// <summary>
