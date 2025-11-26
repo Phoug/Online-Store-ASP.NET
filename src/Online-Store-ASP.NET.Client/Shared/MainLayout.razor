@@ -1,0 +1,63 @@
+﻿@inherits LayoutComponentBase
+
+<header class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm sticky-top">
+    <div class="container-fluid d-flex align-items-center">
+
+        <!-- Лого -->
+        <NavLink class="navbar-brand fw-bold fs-2 my-brand me-4" href="/">
+            PHOUG
+        </NavLink>
+
+        <!-- Каталог -->
+        <NavLink class="nav-link top-item d-flex align-items-center me-3" href="products">
+            <i class="bi bi-grid top-icon"></i>
+            <span>Каталог</span>
+        </NavLink>
+
+        <!-- Поиск -->
+        <div class="flex-grow-1 me-4">
+            <input class="form-control search-box" type="search" placeholder="Поиск товаров...">
+        </div>
+
+        <!-- Кабинет -->
+        <NavLink class="nav-link top-item d-flex align-items-center me-3" href="login">
+            <i class="bi bi-person top-icon"></i>
+            <span>Кабинет</span>
+        </NavLink>
+
+        <!-- Заказы -->
+        <NavLink class="nav-link top-item d-flex align-items-center me-3" href="orders">
+            <i class="bi bi-receipt top-icon"></i>
+            <span>Заказы</span>
+        </NavLink>
+
+        <!-- Избранное -->
+        <NavLink class="nav-link top-item d-flex align-items-center me-3" href="favorites">
+            <i class="bi bi-heart top-icon"></i>
+            <span>Избранное</span>
+        </NavLink>
+
+        <!-- Корзина -->
+        <NavLink class="nav-link top-item d-flex align-items-center position-relative" href="cart">
+            <i class="bi bi-cart3 top-icon"></i>
+            <span>Корзина</span>
+
+            <span class="badge bg-danger position-absolute top-0 start-100 translate-middle rounded-pill">
+                @CartCount
+            </span>
+        </NavLink>
+
+    </div>
+</header>
+
+<main class="container py-4">
+    @Body
+</main>
+
+<footer class="bg-dark text-white text-center py-4 mt-auto">
+    <p class="mb-0">© @DateTime.Now.Year Online Store — Все права защищены</p>
+</footer>
+
+@code {
+    public int CartCount { get; set; } = 2;
+}

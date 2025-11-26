@@ -1,0 +1,78 @@
+﻿@font-face {
+    font-family: 'NTSomic';
+    src: url('/fonts/NTSomic-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'NTSomic';
+    src: url('/fonts/NTSomic-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'NTSomic';
+    src: url('/fonts/NTSomic-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+body {
+    font-family: 'NTSomic', sans-serif;
+}
+
+.my-brand {
+    font-weight: 700;
+    font-family: 'NTSomic', sans-serif;
+}
+
+/* Вертикальное меню с иконкой сверху */
+.nav-vertical {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    padding: 6px 10px !important;
+}
+
+/* Иконка в верхней части */
+.menu-icon {
+    font-size: 1.4rem;
+    display: block;
+    margin-bottom: 2px;
+}
+
+/* Чтобы текст не съезжал */
+.navbar-nav .nav-link {
+    line-height: 1.1 !important;
+}
+
+/* Верхние элементы меню */
+.top-item {
+    color: white !important;
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+    .top-item:hover {
+        opacity: 0.85;
+    }
+
+/* Иконки */
+.top-icon {
+    font-size: 1.4rem;
+    margin-right: 6px;
+}
+
+/* Поисковая строка */
+.search-box {
+    border-radius: 10px;
+    padding: 6px 12px;
+}
+
