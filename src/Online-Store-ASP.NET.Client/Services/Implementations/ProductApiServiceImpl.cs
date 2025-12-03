@@ -1,5 +1,6 @@
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Linq;
 using Shared.DTO.Product;
 using Online_Store_ASP_NET.Client.Services.Interfaces;
 

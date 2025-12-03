@@ -19,60 +19,283 @@
     font-style: normal;
 }
 
-body {
-    font-family: 'NTSomic', sans-serif;
+/* === ТОЛЬКО 5 ЦВЕТОВ === */
+:root {
+    --header-color: #191919; /* Цвет заголовка / шапки */
+    --main-bg: #292929; /* Основной фон страницы */
+    --accent-color: #ff3a3a; /* Акцентный цвет */
+    --secondary-color: #e5e5e5; /* Вспомогательный (карточки, таблицы) */
+    --text-color: #ffffff; /* Основной цвет текста */
 }
 
-.my-brand {
-    font-weight: 700;
+/* ФОН САЙТА И ТЕКСТ */
+html, body {
     font-family: 'NTSomic', sans-serif;
+    background-color: var(--main-bg) !important;
+    color: var(--text-color) !important;
+    margin: 0;
 }
 
-/* Вертикальное меню с иконкой сверху */
+/* === НАВБАР === */
+.navbar {
+    background-color: var(--header-color) !important;
+    color: var(--text-color) !important;
+}
+
+    /* БРЕНД (НАЗВАНИЕ МАГАЗИНА) */
+    .navbar .navbar-brand.my-brand,
+    .navbar .navbar-brand.my-brand:link,
+    .navbar .navbar-brand.my-brand:visited {
+        font-weight: 700;
+        font-family: 'NTSomic', sans-serif;
+        font-size: 1.6rem !important;
+        line-height: 1.1 !important;
+        color: var(--accent-color) !important;
+        /* ПЛАВНАЯ АНИМАЦИЯ */
+        transition: color 0.3s ease, transform 0.3s ease !important;
+    }
+
+        .navbar .navbar-brand.my-brand:hover,
+        .navbar .navbar-brand.my-brand:focus {
+            color: var(--text-color) !important;
+            transform: scale(1.05);
+        }
+
+/* ССЫЛКИ В НАВБАРЕ (ИКОНКИ + ТЕКСТ) */
+.navbar-nav {
+    align-items: center !important;
+}
+
+.navbar .nav-link {
+    color: var(--text-color) !important;
+    line-height: 1.1 !important;
+    padding: 4px 8px !important;
+    text-align: center !important;
+    /* ИСПРАВЛЕНО: Добавлен transform для плавного увеличения */
+    transition: color 0.3s ease, transform 0.3s ease !important;
+}
+
+/* МЕНЮ: ИКОНКА СВЕРХУ, ТЕКСТ СНИЗУ */
 .nav-vertical {
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
     text-align: center !important;
-    padding: 6px 10px !important;
+    padding: 8px 12px !important;
+    gap: 4px !important;
 }
 
-/* Иконка в верхней части */
-.menu-icon {
-    font-size: 1.4rem;
-    display: block;
-    margin-bottom: 2px;
-}
-
-/* Чтобы текст не съезжал */
-.navbar-nav .nav-link {
-    line-height: 1.1 !important;
-}
-
-/* Верхние элементы меню */
+/* Общий вид пункта меню */
 .top-item {
-    color: white !important;
+    color: var(--text-color) !important;
     font-size: 0.95rem;
     font-weight: 500;
     text-decoration: none;
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    gap: 2px;
+    padding: 8px;
+    width: 100%;
+    /* ПЛАВНАЯ АНИМАЦИЯ */
+    transition: color 0.3s ease, transform 0.3s ease !important;
 }
 
-    .top-item:hover {
-        opacity: 0.85;
+/* Иконка */
+.menu-icon,
+.top-icon {
+    font-size: 1.5rem !important;
+    display: block;
+    margin: 0 auto !important;
+    width: auto !important;
+    color: inherit;
+    text-align: center !important;
+    transition: color 0.3s ease !important;
+}
+
+/* Текст под иконкой */
+.menu-text,
+.top-item-text {
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin: 0 !important;
+    text-align: center !important;
+    width: 100%;
+    transition: color 0.3s ease !important;
+}
+
+/* Hover для пункта меню и ссылок */
+.top-item:hover,
+.navbar .nav-link:hover,
+.navbar .nav-link:focus {
+    color: var(--accent-color) !important;
+    transform: scale(1.05) !important; /* Теперь это происходит плавно */
+}
+
+    .top-item:hover .top-icon,
+    .top-item:hover .top-item-text {
+        color: var(--accent-color) !important;
     }
 
-/* Иконки */
-.top-icon {
-    font-size: 1.4rem;
-    margin-right: 6px;
+/* === ПОИСКОВАЯ СТРОКА В НАВБАРЕ === */
+.navbar .search-box.form-control {
+    width: 520px !important;
+    max-width: 60vw;
+    height: auto !important;
+    border: 3px solid var(--secondary-color) !important;
+    background-color: var(--text-color) !important;
+    color: var(--header-color) !important;
+    border-radius: 50px !important;
+    padding: 8px 20px !important;
+    font-size: 1rem !important;
+    box-shadow: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease !important;
 }
 
-/* Поисковая строка */
-.search-box {
-    border-radius: 10px;
-    padding: 6px 12px;
+    .navbar .search-box.form-control:hover {
+        border-color: var(--accent-color) !important;
+        box-shadow: 0 6px 20px rgba(255, 58, 58, 0.15) !important;
+        transform: scale(1.01);
+    }
+
+    .navbar .search-box.form-control:focus {
+        border-color: var(--accent-color) !important;
+        box-shadow: 0 0 0 0.2rem rgba(255, 58, 58, 0.25) !important;
+        transform: scale(1.02);
+        outline: none;
+    }
+
+/* === КНОПКИ === */
+.btn-primary,
+.btn-success,
+.btn-danger {
+    background-color: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
+    color: var(--text-color) !important;
+    /* ПЛАВНАЯ АНИМАЦИЯ */
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, transform 0.3s ease !important;
 }
 
+    .btn-primary:hover,
+    .btn-success:hover,
+    .btn-danger:hover {
+        background-color: var(--header-color) !important;
+        border-color: var(--header-color) !important;
+        color: var(--text-color) !important;
+        transform: scale(1.05) !important;
+    }
+
+/* Outline кнопки */
+.btn-outline-primary {
+    border-color: var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    transition: all 0.3s ease !important;
+}
+
+    .btn-outline-primary:hover {
+        background-color: var(--accent-color) !important;
+        color: var(--text-color) !important;
+        transform: scale(1.05) !important;
+    }
+
+/* === КАРТОЧКИ === */
+.card,
+.mud-card {
+    background-color: var(--secondary-color) !important;
+    border: 1px solid var(--main-bg) !important;
+    color: var(--header-color) !important;
+    transition: box-shadow 0.3s ease, transform 0.3s ease !important;
+}
+
+    .card:hover,
+    .mud-card:hover {
+        transform: scale(1.02) !important;
+        box-shadow: 0 8px 25px rgba(255, 58, 58, 0.2) !important;
+    }
+
+.card-header,
+.mud-card-header {
+    background-color: var(--header-color) !important;
+    color: var(--text-color) !important;
+}
+
+/* === ЗАГОЛОВКИ === */
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+    color: var(--header-color) !important;
+}
+
+/* === ТАБЛИЦЫ === */
+.table {
+    background-color: var(--secondary-color) !important;
+    color: var(--header-color) !important;
+}
+
+    .table th {
+        background-color: var(--header-color) !important;
+        color: var(--text-color) !important;
+        padding: 16px 12px !important;
+    }
+
+    .table td {
+        padding: 12px 8px !important;
+    }
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(229, 229, 229, 0.3) !important;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(255, 58, 58, 0.1) !important;
+    transition: background-color 0.3s ease !important;
+}
+
+/* === ССЫЛКИ === */
+a {
+    color: var(--accent-color) !important;
+    transition: color 0.3s ease !important;
+}
+
+    a:hover {
+        color: var(--text-color) !important;
+        text-decoration: underline;
+    }
+
+/* === MudBlazor ЭЛЕМЕНТЫ === */
+.mud-paper {
+    background-color: var(--secondary-color) !important;
+    color: var(--header-color) !important;
+    transition: all 0.3s ease !important;
+}
+
+.mud-button-primary {
+    background-color: var(--accent-color) !important;
+    color: var(--text-color) !important;
+    transition: background-color 0.3s ease, transform 0.3s ease !important;
+}
+
+    .mud-button-primary:hover {
+        transform: scale(1.05) !important;
+    }
+
+.mud-table {
+    background-color: var(--secondary-color) !important;
+}
+
+.mud-table-row:hover {
+    background-color: rgba(255, 58, 58, 0.1) !important;
+    transition: background-color 0.3s ease !important;
+}
+
+/* === Bootstrap переменные === */
+:root {
+    --bs-primary: var(--accent-color) !important;
+    --bs-primary-rgb: 255,58,58 !important;
+    --bs-success: var(--accent-color) !important;
+    --bs-danger: var(--accent-color) !important;
+    --bs-body-bg: var(--main-bg) !important;
+    --bs-body-color: var(--text-color) !important;
+}

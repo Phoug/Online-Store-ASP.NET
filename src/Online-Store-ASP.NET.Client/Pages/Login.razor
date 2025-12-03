@@ -1,0 +1,125 @@
+﻿@page "/login"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
+@inject NavigationManager Navigation
+
+<div class="login-container">
+    <div class="card login-card shadow-lg">
+        <div class="card-header text-center bg-transparent border-0 pt-4">
+            <h2 class="fw-bold mb-0" style="font-family: 'NTSomic', sans-serif;">Вход</h2>
+            <p class="text-muted mt-2 small">Рады видеть вас снова!</p>
+        </div>
+
+        <div class="card-body p-4">
+            <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="text-danger small mb-3" />
+
+                <!-- Email -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold small ms-2">Email</label>
+                    <InputText @bind-Value="loginModel.Email"
+                               class="form-control rounded-pill px-4 py-2"
+                               placeholder="example@mail.com" />
+                    <ValidationMessage For="@(() => loginModel.Email)" class="text-danger small ms-2 mt-1" />
+                </div>
+
+                <!-- Пароль -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold small ms-2">Пароль</label>
+                    <InputText @bind-Value="loginModel.Password"
+                               type="password"
+                               class="form-control rounded-pill px-4 py-2"
+                               placeholder="••••••••" />
+                    <ValidationMessage For="@(() => loginModel.Password)" class="text-danger small ms-2 mt-1" />
+                </div>
+
+                <!-- Ошибки авторизации -->
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="alert alert-danger text-center py-2 rounded-pill mb-3 small">
+                        @errorMessage
+                    </div>
+                }
+
+                <!-- Кнопка Входа -->
+                <div class="d-grid gap-2 mt-2">
+                    <button type="submit" class="btn btn-primary rounded-pill py-2 fw-bold text-uppercase" disabled="@isLoading">
+                        @if (isLoading)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            <span>Вход...</span>
+                        }
+                        else
+                        {
+                            <span>Войти</span>
+                        }
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+
+        <div class="card-footer text-center bg-transparent border-0 pb-4">
+            <span class="text-muted small">Нет аккаунта?</span>
+            <a href="/register" class="text-decoration-none fw-bold ms-1"
+               style="color: var(--accent-color); transition: color 0.3s ease;">
+                Регистрация
+            </a>
+        </div>
+    </div>
+</div>
+
+@code {
+    // Модель данных
+    public class LoginModel
+    {
+        [Required(ErrorMessage = "Введите Email")]
+        [EmailAddress(ErrorMessage = "Некорректный формат Email")]
+        public string Email { get; set; } = "";
+
+        [Required(ErrorMessage = "Введите пароль")]
+        public string Password { get; set; } = "";
+    }
+
+    private LoginModel loginModel = new();
+    private bool isLoading = false;
+    private string errorMessage = "";
+
+    private async Task HandleLogin()
+    {
+        isLoading = true;
+        errorMessage = ""; // Сброс ошибок
+
+        // Имитация задержки (удалить при реальной логике)
+        await Task.Delay(1500);
+
+        // Здесь будет вызов API
+        // var result = await AuthService.Login(loginModel);
+
+        isLoading = false;
+        Navigation.NavigateTo("/");
+    }
+}
+
+<style>
+    /* Центрирование */
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh;
+        padding: 20px;
+    }
+
+    /* Специфичные стили для карточки */
+    .login-card {
+        width: 100%;
+        max-width: 420px;
+        border-radius: 20px !important;
+        /* Цвета берутся из глобального CSS автоматически */
+    }
+
+        .login-card .form-control {
+            border-radius: 50px !important;
+        }
+</style>
