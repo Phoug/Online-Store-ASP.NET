@@ -1,7 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
-namespace Shared.Models
+namespace Online_Store_ASP_NET.Shared.Models
 {
     /// <summary>
     /// Fields: Id, TotalPrice, UserId, User, CartProducts
@@ -47,6 +48,8 @@ namespace Shared.Models
         /// One-to-one relationship: one User has one Cart.
         /// (Не обязательное для инициализации поле — избегаем требования object-initializer.)
         /// </summary>
+        /// 
+        [JsonIgnore]
         public virtual User? User { get; set; } = null!;
 
         /// <summary>

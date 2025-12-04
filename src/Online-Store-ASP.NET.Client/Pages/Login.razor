@@ -1,54 +1,77 @@
 ﻿@page "/login"
+@layout EmptyLayout
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Components.Forms
+@using Online_Store_ASP_NET.Shared.DTO.User
+@using Online_Store_ASP_NET.Client.Services
 @inject NavigationManager Navigation
+@inject IAuthService AuthService
+@using Microsoft.JSInterop
+@inject IJSRuntime JS
 
 <div class="login-container">
-    <div class="card login-card shadow-lg">
-        <div class="card-header text-center bg-transparent border-0 pt-4">
-            <h2 class="fw-bold mb-0" style="font-family: 'NTSomic', sans-serif;">Вход</h2>
-            <p class="text-muted mt-2 small">Рады видеть вас снова!</p>
+    <div class="card login-card">
+
+        <!-- Заголовок карточки -->
+        <div class="card-header text-center bg-transparent border-0 py-4">
+            <h2 class="fw-bold mb-0 login-title" style="color: var(--accent-color) !important;">Вход</h2>
         </div>
 
-        <div class="card-body p-4">
-            <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
-                <DataAnnotationsValidator />
-                <ValidationSummary class="text-danger small mb-3" />
+        <div class="card-body px-5 py-4 d-flex flex-column justify-content-center">
+            <EditForm Model="@loginModel">
 
                 <!-- Email -->
-                <div class="mb-4">
-                    <label class="form-label fw-bold small ms-2">Email</label>
-                    <InputText @bind-Value="loginModel.Email"
-                               class="form-control rounded-pill px-4 py-2"
-                               placeholder="example@mail.com" />
-                    <ValidationMessage For="@(() => loginModel.Email)" class="text-danger small ms-2 mt-1" />
+                <div class="mb-2 form-group-custom">
+                    <label class="form-label fw-bold small text-uppercase tracking-wider">Email</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-envelope input-icon"></i>
+                        <InputText @bind-Value="loginModel.Email"
+                                   class="form-control custom-input"
+                                   placeholder="name@example.com" />
+                    </div>
+
+                    <div class="validation-hint-wrapper @(ShouldShake && !string.IsNullOrEmpty(EmailError) ? "shake-animation" : "")">
+                        <span class="@(!string.IsNullOrEmpty(EmailError) ? "text-danger fw-bold" : "text-muted") small transition-colors">
+                            @(!string.IsNullOrEmpty(EmailError) ? EmailError : "Мы не передаем ваш email третьим лицам")
+                        </span>
+                    </div>
                 </div>
 
                 <!-- Пароль -->
-                <div class="mb-4">
-                    <label class="form-label fw-bold small ms-2">Пароль</label>
-                    <InputText @bind-Value="loginModel.Password"
-                               type="password"
-                               class="form-control rounded-pill px-4 py-2"
-                               placeholder="••••••••" />
-                    <ValidationMessage For="@(() => loginModel.Password)" class="text-danger small ms-2 mt-1" />
+                <div class="mb-2 form-group-custom">
+                    <label class="form-label fw-bold small text-uppercase tracking-wider">Пароль</label>
+                    <div class="input-wrapper">
+                        <i class="bi bi-lock input-icon"></i>
+                        <InputText @bind-Value="loginModel.Password"
+                                   type="password"
+                                   class="form-control custom-input"
+                                   placeholder="••••••••" />
+                    </div>
+
+                    <div class="validation-hint-wrapper @(ShouldShake && !string.IsNullOrEmpty(PasswordError) ? "shake-animation" : "")">
+                        <span class="@(!string.IsNullOrEmpty(PasswordError) ? "text-danger fw-bold" : "text-muted") small transition-colors">
+                            @(!string.IsNullOrEmpty(PasswordError) ? PasswordError : "Минимум 6 символов")
+                        </span>
+                    </div>
                 </div>
 
-                <!-- Ошибки авторизации -->
-                @if (!string.IsNullOrEmpty(errorMessage))
-                {
-                    <div class="alert alert-danger text-center py-2 rounded-pill mb-3 small">
-                        @errorMessage
-                    </div>
-                }
+                <!-- Ошибки API -->
+                <div class="api-error-wrapper">
+                    @if (!string.IsNullOrEmpty(apiErrorMessage))
+                    {
+                        <div class="alert alert-danger text-center py-2 rounded-pill mb-0 small animate-fade-in w-100">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i> @apiErrorMessage
+                        </div>
+                    }
+                </div>
 
                 <!-- Кнопка Входа -->
-                <div class="d-grid gap-2 mt-2">
-                    <button type="submit" class="btn btn-primary rounded-pill py-2 fw-bold text-uppercase" disabled="@isLoading">
+                <div class="d-flex justify-content-center mt-2">
+                    <button type="button" @onclick="ProcessLogin" class="btn btn-primary custom-btn px-5" disabled="@isLoading">
                         @if (isLoading)
                         {
                             <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                            <span>Вход...</span>
+                            <span>Проверка...</span>
                         }
                         else
                         {
@@ -59,67 +82,320 @@
             </EditForm>
         </div>
 
-        <div class="card-footer text-center bg-transparent border-0 pb-4">
+        <!-- Футер карточки -->
+        <div class="card-footer text-center bg-transparent border-0 pb-4 pt-0">
             <span class="text-muted small">Нет аккаунта?</span>
-            <a href="/register" class="text-decoration-none fw-bold ms-1"
-               style="color: var(--accent-color); transition: color 0.3s ease;">
-                Регистрация
+            <a href="/register" class="register-link">
+                Создать аккаунт
             </a>
         </div>
     </div>
 </div>
 
 @code {
-    // Модель данных
     public class LoginModel
     {
-        [Required(ErrorMessage = "Введите Email")]
-        [EmailAddress(ErrorMessage = "Некорректный формат Email")]
         public string Email { get; set; } = "";
-
-        [Required(ErrorMessage = "Введите пароль")]
         public string Password { get; set; } = "";
     }
 
     private LoginModel loginModel = new();
     private bool isLoading = false;
-    private string errorMessage = "";
 
-    private async Task HandleLogin()
+    private string EmailError = "";
+    private string PasswordError = "";
+    private string apiErrorMessage = "";
+
+    private bool ShouldShake = false;
+
+    private async Task ProcessLogin()
+    {
+        ShouldShake = false;
+        apiErrorMessage = "";
+
+        StateHasChanged();
+        await Task.Delay(50);
+
+        bool isValid = true;
+
+        string newEmailError = "";
+        string newPasswordError = "";
+
+        // ВАЛИДАЦИЯ EMAIL
+        if (string.IsNullOrWhiteSpace(loginModel.Email))
+        {
+            newEmailError = "Поле Email обязательно!";
+            isValid = false;
+        }
+        else if (!new EmailAddressAttribute().IsValid(loginModel.Email))
+        {
+            newEmailError = "Некорректный формат Email!";
+            isValid = false;
+        }
+        else if (!loginModel.Email.Contains(".") || loginModel.Email.EndsWith("."))
+        {
+            newEmailError = "Проверьте домен почты (например .com)!";
+            isValid = false;
+        }
+
+        // ВАЛИДАЦИЯ ПАРОЛЯ
+        if (string.IsNullOrWhiteSpace(loginModel.Password))
+        {
+            newPasswordError = "Введите пароль!";
+            isValid = false;
+        }
+        else if (loginModel.Password.Length < 6)
+        {
+            newPasswordError = "Пароль слишком короткий (минимум 6)!";
+            isValid = false;
+        }
+        else if (loginModel.Password.Contains(" "))
+        {
+            newPasswordError = "Пароль не может содержать пробелы!";
+            isValid = false;
+        }
+
+        EmailError = newEmailError;
+        PasswordError = newPasswordError;
+
+        if (!isValid)
+        {
+            ShouldShake = true;
+            return;
+        }
+
+        await PerformServerLogin();
+    }
+
+    private async Task PerformServerLogin()
     {
         isLoading = true;
-        errorMessage = ""; // Сброс ошибок
+        apiErrorMessage = "";
+        StateHasChanged();
 
-        // Имитация задержки (удалить при реальной логике)
-        await Task.Delay(1500);
+        try
+        {
+            var dto = new UserLoginDto
+            {
+                Email = loginModel.Email,
+                Password = loginModel.Password
+            };
 
-        // Здесь будет вызов API
-        // var result = await AuthService.Login(loginModel);
+            var (success, errorMessage, user) = await AuthService.LoginAsync(dto);
 
-        isLoading = false;
-        Navigation.NavigateTo("/");
+            if (success && user != null)
+            {
+                await JS.InvokeVoidAsync("localStorage.setItem", "currentUserId", user.Id.ToString());
+                Navigation.NavigateTo("/");
+            }
+            else
+            {
+                apiErrorMessage = "Неверный email или пароль";
+                ShouldShake = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            apiErrorMessage = $"Ошибка соединения: {ex.Message}";
+            ShouldShake = true;
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
     }
 }
 
 <style>
-    /* Центрирование */
+    /* === Глобальное центрирование === */
     .login-container {
         display: flex;
         justify-content: center;
         align-items: center;
-        min-height: 80vh;
+        min-height: calc(100vh - 80px);
         padding: 20px;
+        animation: fadeIn 0.5s ease-out;
     }
 
-    /* Специфичные стили для карточки */
+    /* === Карточка === */
     .login-card {
         width: 100%;
-        max-width: 420px;
-        border-radius: 20px !important;
-        /* Цвета берутся из глобального CSS автоматически */
+        max-width: 500px;
+        background-color: var(--secondary-color) !important;
+        border-radius: 24px !important;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2) !important;
+        overflow: hidden;
+        min-height: 520px;
+        display: flex;
+        flex-direction: column;
     }
 
-        .login-card .form-control {
-            border-radius: 50px !important;
+    .card-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    /* === Заголовок === */
+    .login-title {
+        font-family: 'NTSomic', sans-serif;
+        font-size: 2.2rem;
+    }
+
+    .tracking-wider {
+        letter-spacing: 0.05em;
+        color: var(--header-color);
+        opacity: 0.8;
+    }
+
+    /* === Поля ввода и Подсказки === */
+    .input-wrapper {
+        position: relative;
+    }
+
+    .validation-hint-wrapper {
+        min-height: 24px;
+        padding-top: 6px;
+        padding-left: 5px;
+        transition: color 0.3s ease;
+    }
+
+    .transition-colors {
+        transition: color 0.3s ease;
+    }
+
+    /* === Мягкая анимация === */
+    .shake-animation {
+        animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    @@keyframes shake {
+        10%, 90% {
+            transform: translate3d(-1px, 0, 0);
         }
+
+        20%, 80% {
+            transform: translate3d(2px, 0, 0);
+        }
+
+        30%, 50%, 70% {
+            transform: translate3d(-4px, 0, 0);
+        }
+
+        40%, 60% {
+            transform: translate3d(4px, 0, 0);
+        }
+    }
+
+    /* Место под ошибку API */
+    .api-error-wrapper {
+        min-height: 40px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #999;
+        z-index: 5;
+        transition: color 0.3s ease;
+    }
+
+    .custom-input {
+        background-color: var(--main-bg) !important;
+        color: var(--text-color) !important;
+        border: 2px solid transparent !important;
+        border-radius: 12px !important;
+        padding: 12px 15px 12px 45px !important;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+        .custom-input:focus {
+            border-color: var(--accent-color) !important;
+            box-shadow: 0 0 0 4px rgba(255, 58, 58, 0.1) !important;
+        }
+
+            .custom-input:focus + .input-icon,
+            .input-wrapper:focus-within .input-icon {
+                color: var(--accent-color);
+            }
+
+    /* === Кнопка === */
+    .custom-btn {
+        background-color: var(--accent-color) !important;
+        border: none !important;
+        border-radius: 50px !important;
+        padding: 12px 40px !important;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+        min-width: 180px;
+    }
+
+        .custom-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 58, 58, 0.3) !important;
+            color: var(--text-color) !important;
+        }
+
+    /* === Ссылка регистрации === */
+    .register-link {
+        color: var(--accent-color) !important;
+        font-weight: 700;
+        text-decoration: none !important;
+        margin-left: 5px;
+        position: relative;
+        transition: color 0.3s ease;
+        display: inline-block;
+    }
+
+        .register-link:hover {
+            color: var(--accent-color) !important;
+            filter: brightness(1.2);
+        }
+
+        .register-link::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            transform: scaleX(0);
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: var(--accent-color);
+            transform-origin: bottom right;
+            transition: transform 0.25s ease-out;
+        }
+
+        .register-link:hover::after {
+            transform: scaleX(1);
+            transform-origin: bottom left;
+        }
+
+    /* === Анимации === */
+    .animate-fade-in {
+        animation: fadeIn 0.3s ease-in;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 </style>

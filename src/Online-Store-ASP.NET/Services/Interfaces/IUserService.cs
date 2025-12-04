@@ -1,10 +1,12 @@
-﻿using Shared.DTO.User;
+﻿using Online_Store_ASP_NET.Shared.DTO.User;
 
 namespace Services.UserService
 {
     public interface IUserService
     {
         Task<IEnumerable<UserReadDto>> GetAllAsync();
+
+        Task<UserReadDto?> LoginAsync(string email, string password);
 
         Task<UserReadDto?> GetByIdAsync(int id);
 

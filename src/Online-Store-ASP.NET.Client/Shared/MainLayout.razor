@@ -1,63 +1,493 @@
 ﻿@inherits LayoutComponentBase
+@using Microsoft.JSInterop
+@using Online_Store_ASP_NET.Shared.DTO.Category
+@using System.Net.Http.Json
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+@inject HttpClient Http
 
-<header class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm sticky-top">
-    <div class="container-fluid d-flex align-items-center">
+<header class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm sticky-top" style="height: 70px; min-height: 70px;">
+    <div class="container-fluid d-flex align-items-center h-100">
 
-        <!-- Лого -->
         <NavLink class="navbar-brand fw-bold fs-2 my-brand me-4" href="/">
             PHOUG
         </NavLink>
 
-        <!-- Каталог -->
-        <NavLink class="nav-link top-item d-flex align-items-center me-3" href="products">
-            <i class="bi bi-grid top-icon"></i>
+        <button class="nav-link top-item d-flex align-items-center me-3 btn btn-link p-0 border-0"
+                @onclick="ToggleCatalog">
+            <i class="@(IsCatalogOpen ? "bi bi-x-lg" : "bi bi-grid") top-icon"></i>
             <span>Каталог</span>
-        </NavLink>
+        </button>
 
-        <!-- Поиск -->
         <div class="flex-grow-1 me-4">
             <input class="form-control search-box" type="search" placeholder="Поиск товаров...">
         </div>
 
-        <!-- Кабинет -->
-        <NavLink class="nav-link top-item d-flex align-items-center me-3" href="login">
+        <button class="nav-link top-item d-flex align-items-center me-3 btn btn-link p-0 border-0"
+                @onclick="GoToAccount">
             <i class="bi bi-person top-icon"></i>
             <span>Кабинет</span>
-        </NavLink>
+        </button>
 
-        <!-- Заказы -->
         <NavLink class="nav-link top-item d-flex align-items-center me-3" href="orders">
             <i class="bi bi-receipt top-icon"></i>
             <span>Заказы</span>
         </NavLink>
 
-        <!-- Избранное -->
         <NavLink class="nav-link top-item d-flex align-items-center me-3" href="favorites">
             <i class="bi bi-heart top-icon"></i>
             <span>Избранное</span>
         </NavLink>
 
-        <!-- Корзина -->
         <NavLink class="nav-link top-item d-flex align-items-center position-relative" href="cart">
             <i class="bi bi-cart3 top-icon"></i>
             <span>Корзина</span>
-
-            <span class="badge bg-danger position-absolute top-0 start-100 translate-middle rounded-pill">
-                @CartCount
-            </span>
         </NavLink>
 
     </div>
 </header>
 
-<main class="container py-4">
+<div class="catalog-wrapper">
+    <div class="catalog-overlay @(IsCatalogOpen ? "show" : "")" @onclick="CloseCatalog"></div>
+
+    <div class="catalog-sidebar @(IsCatalogOpen ? "open" : "")">
+        <div class="catalog-content">
+
+            <div class="catalog-header">
+                <h4 class="fw-bold text-white mb-0">Категории</h4>
+                @if (IsAdmin)
+                {
+                    <button class="btn btn-sm btn-success rounded-pill px-3 fw-bold shadow-sm"
+                            style="background-color: var(--accent-color); border: none;"
+                            @onclick="ShowAddCategoryModal">
+                        <i class="bi bi-plus-lg me-1"></i> Добавить
+                    </button>
+                }
+            </div>
+
+            <div class="catalog-list">
+                @if (Categories == null)
+                {
+                    <div class="text-white-50 text-center py-3">Загрузка...</div>
+                }
+                else if (!Categories.Any())
+                {
+                    <div class="text-white-50 text-center py-3">Категорий пока нет</div>
+                }
+                else
+                {
+                    <div class="category-list">
+                        @foreach (var cat in Categories)
+                        {
+                            <div class="category-item d-flex align-items-center justify-content-between p-2 rounded mb-2">
+                                <div class="d-flex align-items-center flex-grow-1 gap-3"
+                                     @onclick="() => ToggleCategorySelection(cat.Id)">
+                                    <div class="custom-checkbox @(SelectedCategoryIds.Contains(cat.Id) ? "checked" : "")">
+                                        <i class="bi bi-check-lg text-white" style="@(SelectedCategoryIds.Contains(cat.Id) ? "" : "display:none")"></i>
+                                    </div>
+                                    <span class="cat-name text-white">@cat.Name</span>
+                                </div>
+
+                                @if (IsAdmin)
+                                {
+                                    <button class="btn btn-link text-danger p-0 ms-2 delete-btn"
+                                            @onclick:stopPropagation="true"
+                                            @onclick="() => DeleteCategory(cat.Id)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="catalog-footer">
+                <button class="btn btn-primary w-100 rounded-pill fw-bold"
+                        style="background-color: var(--accent-color); border: none;"
+                        @onclick="ApplyFilters">
+                    Показать товары (@SelectedCategoryIds.Count)
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (ShowAddModal)
+{
+    <div class="modal-backdrop show" style="background-color: rgba(0,0,0,0.7);"></div>
+    <div class="modal d-block fade show" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content custom-modal">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold text-uppercase tracking-wider" style="color: var(--accent-color);">
+                        Новая категория
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="() => ShowAddModal = false"></button>
+                </div>
+
+                <div class="modal-body pt-4">
+                    <div class="mb-4">
+                        <label class="form-label small text-uppercase text-muted fw-bold tracking-wider">Название</label>
+                        <input class="form-control custom-input"
+                               placeholder="Например: Смартфоны"
+                               @bind="NewCategoryName" />
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label small text-uppercase text-muted fw-bold tracking-wider">Описание</label>
+                        <textarea class="form-control custom-input"
+                                  rows="3"
+                                  placeholder="Краткое описание категории..."
+                                  @bind="NewCategoryDescription"></textarea>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(AddCategoryError))
+                    {
+                        <div class="alert alert-danger mt-3 py-2 small rounded-3">
+                            <i class="bi bi-exclamation-circle-fill me-2"></i>@AddCategoryError
+                        </div>
+                    }
+                </div>
+
+                <div class="modal-footer border-0 pt-0 pb-4 px-3 justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" @onclick="() => ShowAddModal = false">
+                        Отмена
+                    </button>
+                    <button type="button" class="btn btn-primary custom-btn px-4" @onclick="AddCategory" disabled="@IsAdding">
+                        @if (IsAdding)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                            <span>Сохранение...</span>
+                        }
+                        else
+                        {
+                            <span>Создать</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<main class="container pt-2 pb-4">
     @Body
 </main>
 
-<footer class="bg-dark text-white text-center py-4 mt-auto">
-    <p class="mb-0">© @DateTime.Now.Year Online Store — Все права защищены</p>
-</footer>
-
 @code {
-    public int CartCount { get; set; } = 2;
+    private bool IsCatalogOpen = false;
+    private bool ShowAddModal = false;
+    private bool IsAdmin = false;
+    private bool IsAdding = false;
+    private string NewCategoryName = "";
+    private string NewCategoryDescription = "";
+    private string AddCategoryError = "";
+
+    public class CategoryDto { public int Id { get; set; } public string Name { get; set; } = ""; }
+    private List<CategoryDto>? Categories;
+    private HashSet<int> SelectedCategoryIds = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CheckUserRole();
+        await LoadCategories();
+    }
+
+    private async Task CheckUserRole()
+    {
+        try
+        {
+            var role = await JS.InvokeAsync<string>("localStorage.getItem", "userRole");
+            IsAdmin = !string.IsNullOrEmpty(role) && role.Equals("Admin", StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            IsAdmin = false;
+        }
+    }
+
+    private async Task ToggleCatalog()
+    {
+        if (!IsCatalogOpen)
+        {
+            await CheckUserRole();
+        }
+        IsCatalogOpen = !IsCatalogOpen;
+    }
+
+    private async Task LoadCategories()
+    {
+        try
+        {
+            Categories = await Http.GetFromJsonAsync<List<CategoryDto>>("category");
+        }
+        catch
+        {
+            Categories = new List<CategoryDto>();
+        }
+    }
+
+    private void CloseCatalog() => IsCatalogOpen = false;
+
+    private void ToggleCategorySelection(int id)
+    {
+        if (SelectedCategoryIds.Contains(id)) SelectedCategoryIds.Remove(id);
+        else SelectedCategoryIds.Add(id);
+    }
+
+    private void ApplyFilters()
+    {
+        CloseCatalog();
+        var query = string.Join(",", SelectedCategoryIds);
+        Navigation.NavigateTo($"/products?categories={query}");
+    }
+
+    private void ShowAddCategoryModal()
+    {
+        NewCategoryName = "";
+        NewCategoryDescription = "";
+        AddCategoryError = "";
+        ShowAddModal = true;
+    }
+
+    private async Task AddCategory()
+    {
+        if (string.IsNullOrWhiteSpace(NewCategoryName))
+        {
+            AddCategoryError = "Введите название!";
+            return;
+        }
+
+        IsAdding = true;
+        AddCategoryError = "";
+
+        try
+        {
+            var createDto = new CategoryCreateDto
+            {
+                Name = NewCategoryName,
+                Description = NewCategoryDescription
+            };
+
+            var response = await Http.PostAsJsonAsync("category", createDto);
+
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadCategories();
+                ShowAddModal = false;
+            }
+            else
+            {
+                AddCategoryError = "Ошибка сервера при создании.";
+            }
+        }
+        catch (Exception ex)
+        {
+            AddCategoryError = $"Ошибка: {ex.Message}";
+        }
+        finally
+        {
+            IsAdding = false;
+        }
+    }
+
+    private async Task DeleteCategory(int id)
+    {
+        bool confirmed = await JS.InvokeAsync<bool>("confirm", "Удалить категорию?");
+        if (confirmed)
+        {
+            var response = await Http.DeleteAsync($"category/{id}");
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadCategories();
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("alert", "Не удалось удалить.");
+            }
+        }
+    }
+
+    private async Task GoToAccount()
+    {
+        var userId = await JS.InvokeAsync<string>("localStorage.getItem", "currentUserId");
+        Navigation.NavigateTo(string.IsNullOrEmpty(userId) ? "/login" : "/account");
+    }
 }
+
+<style>
+    .catalog-sidebar {
+        position: fixed;
+        top: 70px;
+        left: -350px;
+        width: 320px;
+        height: calc(100vh - 70px);
+        background-color: #222;
+        border-right: 1px solid rgba(255,255,255,0.1);
+        z-index: 1050;
+        transition: left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+    }
+
+        .catalog-sidebar.open {
+            left: 0;
+        }
+
+    .catalog-content {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        padding: 1.5rem;
+        overflow: hidden;
+    }
+
+    .catalog-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .catalog-list {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 0.5rem;
+        margin-bottom: 1rem;
+        min-height: 0;
+    }
+
+    .catalog-footer {
+        padding-top: 1rem;
+        border-top: 1px solid rgba(255,255,255,0.1);
+        flex-shrink: 0;
+    }
+
+    .catalog-list::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .catalog-list::-webkit-scrollbar-track {
+        background: rgba(255,255,255,0.05);
+        border-radius: 4px;
+    }
+
+    .catalog-list::-webkit-scrollbar-thumb {
+        background-color: rgba(255,255,255,0.2);
+        border-radius: 4px;
+    }
+
+        .catalog-list::-webkit-scrollbar-thumb:hover {
+            background-color: var(--accent-color);
+        }
+
+    .catalog-overlay {
+        position: fixed;
+        top: 70px;
+        left: 0;
+        width: 100vw;
+        height: calc(100vh - 70px);
+        background-color: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(2px);
+        z-index: 1040;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+
+        .catalog-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+    .category-item {
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+        .category-item:hover {
+            background-color: rgba(255,255,255,0.05);
+        }
+
+    .cat-name {
+        font-size: 1.05rem;
+        font-weight: 500;
+    }
+
+    .custom-checkbox {
+        width: 22px;
+        height: 22px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        flex-shrink: 0;
+    }
+
+        .custom-checkbox.checked {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        .custom-checkbox i {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+    .delete-btn {
+        opacity: 0.6;
+        transition: opacity 0.2s;
+    }
+
+        .delete-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+    .custom-modal {
+        background-color: var(--secondary-color) !important;
+        border-radius: 20px !important;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        color: var(--text-color);
+    }
+
+    .tracking-wider {
+        letter-spacing: 0.05em;
+    }
+
+    .custom-input {
+        background-color: var(--main-bg) !important;
+        color: var(--text-color) !important;
+        border: 2px solid transparent !important;
+        border-radius: 12px !important;
+        padding: 10px 15px !important;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+        .custom-input:focus {
+            border-color: var(--accent-color) !important;
+            box-shadow: 0 0 0 4px rgba(255, 58, 58, 0.1) !important;
+            outline: none;
+        }
+
+    .custom-btn {
+        background-color: var(--accent-color) !important;
+        border: none !important;
+        border-radius: 50px !important;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    }
+
+        .custom-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 58, 58, 0.3) !important;
+        }
+</style>

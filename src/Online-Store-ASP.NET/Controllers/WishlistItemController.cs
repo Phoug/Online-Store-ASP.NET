@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using System.Net.Mime;
-using Shared.Models;
+using Online_Store_ASP_NET.Shared.Models;
 using Shared.Services;
 
 namespace Controllers

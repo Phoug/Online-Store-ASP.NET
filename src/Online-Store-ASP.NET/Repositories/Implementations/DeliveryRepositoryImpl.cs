@@ -1,7 +1,7 @@
 ﻿using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Repositories.Interfaces;
-using Shared.Models;
+using Online_Store_ASP_NET.Shared.Models;
 
 namespace Repositories.Implementations
 {

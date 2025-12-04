@@ -4,7 +4,7 @@ using FluentAssertions;
 using Moq;
 using Services.Implementations;
 using Repositories.Interfaces;
-using Shared.Models;
+using Online_Store_ASP_NET.Shared.Models;
 using Xunit;
 
 namespace Online_Store_ASP_NET.Tests.Services

@@ -1,15 +1,552 @@
 ﻿@page "/"
+@using Online_Store_ASP_NET.Shared.DTO.Product
+@using System.Net.Http.Json
+@inject HttpClient Http
+@using Microsoft.JSInterop
+@inject IJSRuntime JS
 
-<div class="hero min-vh-100 d-flex align-items-center justify-content-center text-white">
-    <div class="container text-center">
-        <h1 class="display-1 fw-bold mb-4">Online Store</h1>
-        <p class="lead fs-1 mb-5">Самый крутой интернет-магазин 2025 года</p>
-        <a href="/products" class="btn btn-primary btn-lg px-5 py-3">В каталог</a>
+<div class="products-page">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-white">Каталог товаров</h2>
+        @if (IsAdminOrSeller)
+        {
+            <button class="btn btn-primary custom-btn px-4" @onclick="ShowAddProductModal">
+                <i class="bi bi-plus-lg me-2"></i>Добавить товар
+            </button>
+        }
     </div>
+
+    @if (Products == null)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Загрузка...</span>
+            </div>
+            <p class="text-white-50 mt-3">Загрузка товаров...</p>
+        </div>
+    }
+    else if (!Products.Any())
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-inbox display-1 text-white-50"></i>
+            <p class="text-white-50 mt-3 fs-5">Товаров пока нет</p>
+            @if (IsAdminOrSeller)
+            {
+                <button class="btn btn-primary custom-btn mt-3" @onclick="ShowAddProductModal">
+                    Добавить первый товар
+                </button>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var product in Products)
+            {
+                <div class="col-12 col-sm-6 col-md-4">
+                    <div class="product-card">
+                        <div class="product-image">
+                            @if (product.MediaUrls?.Any() == true)
+                            {
+                                <img src="@product.MediaUrls.First()"
+                                     alt="@product.Name"
+                                     crossorigin="anonymous"
+                                     loading="lazy"
+                                     onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'no-image\'><i class=\'bi bi-image\'></i></div>';" />
+                            }
+                            else
+                            {
+                                <div class="no-image">
+                                    <i class="bi bi-image"></i>
+                                </div>
+                            }
+                            @if (IsAdminOrSeller)
+                            {
+                                <div class="product-actions">
+                                    <button class="btn btn-sm btn-warning" title="Редактировать">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" title="Удалить" @onclick="() => DeleteProduct(product.Id)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                        <div class="product-info">
+                            <div class="product-article text-muted small">@product.Article</div>
+                            <h5 class="product-name">@product.Name</h5>
+                            <p class="product-description">@product.Description</p>
+                            <div class="product-footer">
+                                <div class="product-price">@product.Price.ToString("C0")</div>
+                                <button class="btn btn-primary btn-sm custom-btn-sm">
+                                    <i class="bi bi-cart-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
 </div>
 
+@if (ShowAddModal)
+{
+    <div class="modal-backdrop show" style="background-color: rgba(0,0,0,0.7);"></div>
+    <div class="modal d-block fade show" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content custom-modal">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold text-uppercase tracking-wider" style="color: var(--accent-color);">
+                        Новый товар
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="() => ShowAddModal = false"></button>
+                </div>
+
+                <div class="modal-body pt-4">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small text-uppercase text-muted fw-bold tracking-wider">Артикул</label>
+                            <input class="form-control custom-input" placeholder="ABC-12345" maxlength="11" @bind="NewProduct.Article" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small text-uppercase text-muted fw-bold tracking-wider">Название</label>
+                            <input class="form-control custom-input" placeholder="Смартфон Samsung Galaxy" maxlength="64" @bind="NewProduct.Name" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small text-uppercase text-muted fw-bold tracking-wider">Описание</label>
+                        <textarea class="form-control custom-input" rows="3" placeholder="Описание товара..." maxlength="256" @bind="NewProduct.Description"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small text-uppercase text-muted fw-bold tracking-wider">Цена</label>
+                        <input type="number" class="form-control custom-input" placeholder="0.00" step="0.01" min="0.01" @bind="NewProduct.Price" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small text-uppercase text-muted fw-bold tracking-wider">URL изображений (через запятую)</label>
+                        <textarea class="form-control custom-input" rows="2" placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg" @bind="MediaUrlsString"></textarea>
+                        <small class="form-text text-muted mt-1 d-block">
+                            Поддерживаются форматы: JPG, PNG, WebP, GIF
+                        </small>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(AddProductError))
+                    {
+                        <div class="alert alert-danger mt-3 py-2 small rounded-3">
+                            <i class="bi bi-exclamation-circle-fill me-2"></i>@AddProductError
+                        </div>
+                    }
+                </div>
+
+                <div class="modal-footer border-0 pt-0 pb-4 px-3 justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" @onclick="() => ShowAddModal = false">
+                        Отмена
+                    </button>
+                    <button type="button" class="btn btn-primary custom-btn px-4" @onclick="AddProduct" disabled="@IsAdding">
+                        @if (IsAdding)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                            <span>Сохранение...</span>
+                        }
+                        else
+                        {
+                            <span>Создать</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<ProductReadDto>? Products;
+    private bool IsAdminOrSeller = false;
+    private bool ShowAddModal = false;
+    private bool IsAdding = false;
+    private ProductCreateDto NewProduct = new();
+    private string MediaUrlsString = "";
+    private string AddProductError = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CheckUserRole();
+        await LoadProducts();
+    }
+
+    private async Task CheckUserRole()
+    {
+        try
+        {
+            var role = await JS.InvokeAsync<string>("localStorage.getItem", "userRole");
+            IsAdminOrSeller = !string.IsNullOrEmpty(role) &&
+                (role.Equals("Admin", StringComparison.OrdinalIgnoreCase) ||
+                 role.Equals("Manager", StringComparison.OrdinalIgnoreCase) ||
+                 role.Equals("Seller", StringComparison.OrdinalIgnoreCase));
+        }
+        catch
+        {
+            IsAdminOrSeller = false;
+        }
+    }
+
+    private async Task LoadProducts()
+    {
+        try
+        {
+            Products = await Http.GetFromJsonAsync<List<ProductReadDto>>("product");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Ошибка загрузки товаров: {ex.Message}");
+            Products = new List<ProductReadDto>();
+        }
+    }
+
+    private void ShowAddProductModal()
+    {
+        NewProduct = new ProductCreateDto();
+        MediaUrlsString = "";
+        AddProductError = "";
+        ShowAddModal = true;
+    }
+
+    private async Task AddProduct()
+    {
+        if (string.IsNullOrWhiteSpace(NewProduct.Article))
+        {
+            AddProductError = "Введите артикул!";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(NewProduct.Name))
+        {
+            AddProductError = "Введите название!";
+            return;
+        }
+
+        if (NewProduct.Price <= 0)
+        {
+            AddProductError = "Цена должна быть больше нуля!";
+            return;
+        }
+
+        IsAdding = true;
+        AddProductError = "";
+
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(MediaUrlsString))
+            {
+                NewProduct.MediaUrls = MediaUrlsString
+                    .Split(',')
+                    .Select(url => url.Trim())
+                    .Where(url => !string.IsNullOrEmpty(url))
+                    .ToList();
+            }
+
+            var response = await Http.PostAsJsonAsync("product", NewProduct);
+
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadProducts();
+                ShowAddModal = false;
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                AddProductError = $"Ошибка сервера: {response.StatusCode}";
+            }
+        }
+        catch (Exception ex)
+        {
+            AddProductError = $"Ошибка: {ex.Message}";
+        }
+        finally
+        {
+            IsAdding = false;
+        }
+    }
+
+    private async Task DeleteProduct(int id)
+    {
+        bool confirmed = await JS.InvokeAsync<bool>("confirm", "Удалить товар?");
+        if (confirmed)
+        {
+            try
+            {
+                var response = await Http.DeleteAsync($"product/{id}");
+                if (response.IsSuccessStatusCode)
+                {
+                    await LoadProducts();
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("alert", "Не удалось удалить товар.");
+                }
+            }
+            catch (Exception ex)
+            {
+                await JS.InvokeVoidAsync("alert", $"Ошибка: {ex.Message}");
+            }
+        }
+    }
+}
+
 <style>
-    .hero {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    .products-page {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 15px;
+    }
+
+    .product-card {
+        background: linear-gradient(145deg, var(--secondary-color) 0%, rgba(30, 30, 35, 0.95) 100%);
+        border-radius: 20px;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+        .product-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(255, 58, 58, 0.3);
+            border-color: rgba(255, 58, 58, 0.3);
+        }
+
+    .product-image {
+        position: relative;
+        width: 100%;
+        padding-top: 100%;
+        background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+        overflow: hidden;
+    }
+
+        .product-image img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+            background-color: var(--secondary-color);
+        }
+
+    .product-card:hover .product-image img {
+        transform: scale(1.1);
+    }
+
+    .product-image .no-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3.5rem;
+        color: rgba(255,255,255,0.15);
+        background: linear-gradient(135deg, rgba(255,58,58,0.05) 0%, rgba(255,255,255,0.02) 100%);
+    }
+
+    .product-actions {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        display: flex;
+        gap: 10px;
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+        z-index: 10;
+    }
+
+    .product-card:hover .product-actions {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .product-actions .btn {
+        border-radius: 10px;
+        padding: 8px 12px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        transition: all 0.2s ease;
+    }
+
+        .product-actions .btn:hover {
+            transform: scale(1.1);
+        }
+
+    .product-info {
+        padding: 1.5rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.2) 100%);
+    }
+
+    .product-article {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 0.5rem;
+        color: rgba(255,255,255,0.5);
+        font-weight: 600;
+    }
+
+    .product-name {
+        color: var(--text-color);
+        font-size: 1.15rem;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        min-height: 2.3rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        line-height: 1.4;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .product-description {
+        color: #c0c0c0;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        flex: 1;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        line-height: 1.6;
+        opacity: 0.9;
+    }
+
+    .product-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: auto;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .product-price {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: var(--accent-color);
+        text-shadow: 0 0 20px rgba(255, 58, 58, 0.4);
+        letter-spacing: -0.5px;
+    }
+
+    .custom-btn {
+        background: linear-gradient(135deg, var(--accent-color) 0%, #ff6b6b 100%) !important;
+        border: none !important;
+        border-radius: 14px !important;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        box-shadow: 0 4px 15px rgba(255, 58, 58, 0.3);
+    }
+
+        .custom-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 58, 58, 0.5) !important;
+            background: linear-gradient(135deg, #ff6b6b 0%, var(--accent-color) 100%) !important;
+        }
+
+        .custom-btn:active {
+            transform: translateY(-1px);
+        }
+
+    .custom-btn-sm {
+        background: linear-gradient(135deg, var(--accent-color) 0%, #ff6b6b 100%) !important;
+        border: none !important;
+        border-radius: 10px !important;
+        padding: 10px 14px !important;
+        transition: all 0.2s ease !important;
+        box-shadow: 0 3px 10px rgba(255, 58, 58, 0.3);
+    }
+
+        .custom-btn-sm:hover {
+            transform: scale(1.15) rotate(5deg);
+            box-shadow: 0 5px 15px rgba(255, 58, 58, 0.5);
+        }
+
+    .custom-modal {
+        background: linear-gradient(145deg, var(--secondary-color) 0%, #1a1a1f 100%) !important;
+        border-radius: 24px !important;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+        color: var(--text-color);
+    }
+
+    .tracking-wider {
+        letter-spacing: 0.08em;
+    }
+
+    .custom-input {
+        background-color: rgba(20, 20, 25, 0.8) !important;
+        color: var(--text-color) !important;
+        border: 2px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 12px !important;
+        padding: 12px 16px !important;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+        .custom-input:hover {
+            border-color: rgba(255, 255, 255, 0.2) !important;
+            background-color: rgba(25, 25, 30, 0.9) !important;
+        }
+
+        .custom-input:focus {
+            border-color: var(--accent-color) !important;
+            box-shadow: 0 0 0 4px rgba(255, 58, 58, 0.15) !important;
+            outline: none;
+            background-color: rgba(30, 30, 35, 0.95) !important;
+        }
+
+    .modal-backdrop.show {
+        backdrop-filter: blur(8px);
+    }
+
+    .btn-outline-secondary {
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        color: rgba(255, 255, 255, 0.8);
+        transition: all 0.3s ease;
+    }
+
+        .btn-outline-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.4);
+            color: #fff;
+        }
+
+    media (max-width: 768px) {
+        .product-card
+
+    {
+        margin-bottom: 1rem;
+    }
+
+    .product-price {
+        font-size: 1.5rem;
+    }
+
+    .product-name {
+        font-size: 1rem;
+    }
+
     }
 </style>

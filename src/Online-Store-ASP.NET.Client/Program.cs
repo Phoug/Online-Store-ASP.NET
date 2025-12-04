@@ -1,18 +1,23 @@
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Online_Store_ASP_NET.Client;
-using Online_Store_ASP_NET.Client.Services.Implementations;
-using Online_Store_ASP_NET.Client.Services.Interfaces;
-using System;
-using System.Net.Http;
+using Online_Store_ASP_NET.Client.Services;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-var apiBase = builder.Configuration["ApiBaseUrl"] ?? builder.HostEnvironment.BaseAddress;
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiBase) });
+builder.Services.AddAuthorizationCore();
+builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 
-builder.Services.AddScoped<IProductApiService, ProductApiServiceImpl>();
+// HttpClient с базовым адресом сервера API
+builder.Services.AddScoped(sp => new HttpClient
+{
+    BaseAddress = new Uri("http://localhost:5011/")
+});
+
+// сервис авторизации
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 await builder.Build().RunAsync();

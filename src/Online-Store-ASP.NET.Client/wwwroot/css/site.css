@@ -142,9 +142,10 @@ html, body {
 
 /* === ПОИСКОВАЯ СТРОКА В НАВБАРЕ === */
 .navbar .search-box.form-control {
-    width: 520px !important;
+    width: 900px !important;
     max-width: 60vw;
     height: auto !important;
+    max-height: 45px;
     border: 3px solid var(--secondary-color) !important;
     background-color: var(--text-color) !important;
     color: var(--header-color) !important;

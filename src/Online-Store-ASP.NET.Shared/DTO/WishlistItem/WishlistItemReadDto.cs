@@ -11,6 +11,6 @@ namespace Shared.DTO.WishlistItem
 
         public int ProductId { get; set; }
 
-        public Shared.DTO.Product.ProductReadDto Product { get; set; } = null!;
+        public Online_Store_ASP_NET.Shared.DTO.Product.ProductReadDto Product { get; set; } = null!;
     }
 }

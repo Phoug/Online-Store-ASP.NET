@@ -1,4 +1,4 @@
-﻿using Shared.Models;
+﻿using Online_Store_ASP_NET.Shared.Models;
 using Repositories.Interfaces;
 using Services.Interfaces;
 

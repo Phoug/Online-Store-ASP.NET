@@ -1,0 +1,511 @@
+﻿@page "/register"
+@layout EmptyLayout
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
+@using Online_Store_ASP_NET.Shared.DTO.User
+@using Online_Store_ASP_NET.Client.Services
+@inject NavigationManager Navigation
+@inject IAuthService AuthService
+
+<div class="register-container">
+    <div class="card register-card">
+
+        <!-- Заголовок -->
+        <div class="card-header text-center bg-transparent border-0 py-4">
+            <h2 class="fw-bold mb-0 register-title" style="color: var(--accent-color) !important;">Регистрация</h2>
+        </div>
+
+        <div class="card-body px-5 py-2 d-flex flex-column justify-content-center">
+            <EditForm Model="@registerModel">
+
+                <!-- Сетка 2 колонки -->
+                <div class="row gx-4">
+
+                    <!-- Логин (Username) -->
+                    <div class="col-md-6 mb-2">
+                        <div class="form-group-custom">
+                            <label class="form-label fw-bold small text-uppercase tracking-wider">Логин</label>
+                            <div class="input-wrapper">
+                                <i class="bi bi-person-badge input-icon"></i>
+                                <InputText @bind-Value="registerModel.Username" class="form-control custom-input" placeholder="user123" />
+                            </div>
+                            <div class="validation-hint-wrapper @(ShouldShake && !string.IsNullOrEmpty(UsernameError) ? "shake-animation" : "")">
+                                <span class="@(!string.IsNullOrEmpty(UsernameError) ? "text-danger fw-bold" : "text-muted") small transition-colors">
+                                    @(!string.IsNullOrEmpty(UsernameError) ? UsernameError : "Уникальный никнейм")
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ФИО (Name) -->
+                    <div class="col-md-6 mb-2">
+                        <div class="form-group-custom">
+                            <label class="form-label fw-bold small text-uppercase tracking-wider">ФИО</label>
+                            <div class="input-wrapper">
+                                <i class="bi bi-person input-icon"></i>
+                                <InputText @bind-Value="registerModel.Name" class="form-control custom-input" placeholder="Иван Иванов" />
+                            </div>
+                            <div class="validation-hint-wrapper @(ShouldShake && !string.IsNullOrEmpty(NameError) ? "shake-animation" : "")">
+                                <span class="@(!string.IsNullOrEmpty(NameError) ? "text-danger fw-bold" : "text-muted") small transition-colors">
+                                    @(!string.IsNullOrEmpty(NameError) ? NameError : "Как к вам обращаться")
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="col-md-6 mb-2">
+                        <div class="form-group-custom">
+                            <label class="form-label fw-bold small text-uppercase tracking-wider">Email</label>
+                            <div class="input-wrapper">
+                                <i class="bi bi-envelope input-icon"></i>
+                                <InputText @bind-Value="registerModel.Email" class="form-control custom-input" placeholder="mail@example.com" />
+                            </div>
+                            <div class="validation-hint-wrapper @(ShouldShake && !string.IsNullOrEmpty(EmailError) ? "shake-animation" : "")">
+                                <span class="@(!string.IsNullOrEmpty(EmailError) ? "text-danger fw-bold" : "text-muted") small transition-colors">
+                                    @(!string.IsNullOrEmpty(EmailError) ? EmailError : "Для связи и входа")
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Телефон -->
+                    <div class="col-md-6 mb-2">
+                        <div class="form-group-custom">
+                            <label class="form-label fw-bold small text-uppercase tracking-wider">Телефон</label>
+                            <div class="input-wrapper">
+                                <i class="bi bi-telephone input-icon"></i>
+                                <InputText @bind-Value="registerModel.Phone" class="form-control custom-input" placeholder="+7 (999) 000-00-00" />
+                            </div>
+                            <div class="validation-hint-wrapper @(ShouldShake && !string.IsNullOrEmpty(PhoneError) ? "shake-animation" : "")">
+                                <span class="@(!string.IsNullOrEmpty(PhoneError) ? "text-danger fw-bold" : "text-muted") small transition-colors">
+                                    @(!string.IsNullOrEmpty(PhoneError) ? PhoneError : "Для уведомлений")
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Дата рождения -->
+                    <div class="col-12 mb-2">
+                        <div class="form-group-custom">
+                            <label class="form-label fw-bold small text-uppercase tracking-wider">Дата рождения</label>
+                            <div class="input-wrapper">
+                                <i class="bi bi-calendar-event input-icon"></i>
+                                <InputDate @bind-Value="registerModel.BirthDate" class="form-control custom-input" />
+                            </div>
+                            <div class="validation-hint-wrapper @(ShouldShake && !string.IsNullOrEmpty(BirthDateError) ? "shake-animation" : "")">
+                                <span class="@(!string.IsNullOrEmpty(BirthDateError) ? "text-danger fw-bold" : "text-muted") small transition-colors">
+                                    @(!string.IsNullOrEmpty(BirthDateError) ? BirthDateError : "Вам должно быть больше 14 лет")
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Пароль -->
+                    <div class="col-md-6 mb-2">
+                        <div class="form-group-custom">
+                            <label class="form-label fw-bold small text-uppercase tracking-wider">Пароль</label>
+                            <div class="input-wrapper">
+                                <i class="bi bi-lock input-icon"></i>
+                                <InputText @bind-Value="registerModel.Password" type="password" class="form-control custom-input" placeholder="••••••••" />
+                            </div>
+                            <div class="validation-hint-wrapper @(ShouldShake && !string.IsNullOrEmpty(PasswordError) ? "shake-animation" : "")">
+                                <span class="@(!string.IsNullOrEmpty(PasswordError) ? "text-danger fw-bold" : "text-muted") small transition-colors">
+                                    @(!string.IsNullOrEmpty(PasswordError) ? PasswordError : "Мин. 6 символов")
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Повтор пароля -->
+                    <div class="col-md-6 mb-2">
+                        <div class="form-group-custom">
+                            <label class="form-label fw-bold small text-uppercase tracking-wider">Повтор пароля</label>
+                            <div class="input-wrapper">
+                                <i class="bi bi-shield-lock input-icon"></i>
+                                <InputText @bind-Value="registerModel.ConfirmPassword" type="password" class="form-control custom-input" placeholder="••••••••" />
+                            </div>
+                            <div class="validation-hint-wrapper @(ShouldShake && !string.IsNullOrEmpty(ConfirmError) ? "shake-animation" : "")">
+                                <span class="@(!string.IsNullOrEmpty(ConfirmError) ? "text-danger fw-bold" : "text-muted") small transition-colors">
+                                    @(!string.IsNullOrEmpty(ConfirmError) ? ConfirmError : "Должны совпадать")
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div> <!-- Конец row -->
+                <!-- Ошибки API -->
+                <div class="api-error-wrapper">
+                    @if (!string.IsNullOrEmpty(apiErrorMessage))
+                    {
+                        <div class="alert alert-danger text-center py-2 rounded-pill mb-0 small animate-fade-in w-100">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i> @apiErrorMessage
+                        </div>
+                    }
+                </div>
+
+                <!-- Кнопка -->
+                <div class="d-flex justify-content-center mt-2">
+                    <button type="button" @onclick="ProcessRegister" class="btn btn-primary custom-btn px-5" disabled="@isLoading">
+                        @if (isLoading)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            <span>Регистрация...</span>
+                        }
+                        else
+                        {
+                            <span>Создать аккаунт</span>
+                        }
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+
+        <!-- Футер карточки -->
+        <div class="card-footer text-center bg-transparent border-0 pb-4 pt-2">
+            <span class="text-muted small">Уже есть аккаунт?</span>
+            <a href="/login" class="login-link">
+                Войти
+            </a>
+        </div>
+    </div>
+</div>
+
+@code {
+    public class RegisterModel
+    {
+        public string Username { get; set; } = "";
+        public string Name { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string Phone { get; set; } = "";
+        public DateTime BirthDate { get; set; } = new DateTime(2000, 1, 1);
+        public string Password { get; set; } = "";
+        public string ConfirmPassword { get; set; } = "";
+    }
+
+    private RegisterModel registerModel = new();
+    private bool isLoading = false;
+    private bool ShouldShake = false;
+
+    // Ошибки
+    private string UsernameError = "";
+    private string NameError = "";
+    private string EmailError = "";
+    private string PhoneError = "";
+    private string BirthDateError = "";
+    private string PasswordError = "";
+    private string ConfirmError = "";
+    private string apiErrorMessage = "";
+
+    private async Task ProcessRegister()
+    {
+        ShouldShake = false;
+        apiErrorMessage = "";
+
+        // Сброс текстов ошибок
+        UsernameError = ""; NameError = ""; EmailError = ""; PhoneError = "";
+        BirthDateError = ""; PasswordError = ""; ConfirmError = "";
+
+        StateHasChanged();
+        await Task.Delay(50);
+
+        bool isValid = true;
+
+        // 1. Логин
+        if (string.IsNullOrWhiteSpace(registerModel.Username))
+        {
+            UsernameError = "Придумайте логин!"; isValid = false;
+        }
+
+        // 2. Имя
+        if (string.IsNullOrWhiteSpace(registerModel.Name))
+        {
+            NameError = "Введите ФИО!"; isValid = false;
+        }
+
+        // 3. Email
+        if (string.IsNullOrWhiteSpace(registerModel.Email))
+        {
+            EmailError = "Email обязателен!"; isValid = false;
+        }
+        else if (!new EmailAddressAttribute().IsValid(registerModel.Email))
+        {
+            EmailError = "Некорректный Email!"; isValid = false;
+        }
+
+        // 4. Телефон
+        if (string.IsNullOrWhiteSpace(registerModel.Phone))
+        {
+            PhoneError = "Телефон обязателен!"; isValid = false;
+        }
+
+        // 5. Дата рождения
+        if (registerModel.BirthDate > DateTime.Now.AddYears(-5))
+        {
+            BirthDateError = "Слишком маленький возраст!"; isValid = false;
+        }
+
+        // 6. Пароли
+        if (string.IsNullOrWhiteSpace(registerModel.Password))
+        {
+            PasswordError = "Введите пароль!"; isValid = false;
+        }
+        else if (registerModel.Password.Length < 6)
+        {
+            PasswordError = "Мин. 6 символов!"; isValid = false;
+        }
+
+        if (string.IsNullOrWhiteSpace(registerModel.ConfirmPassword))
+        {
+            ConfirmError = "Повторите пароль!"; isValid = false;
+        }
+        else if (registerModel.Password != registerModel.ConfirmPassword)
+        {
+            ConfirmError = "Не совпадают!"; isValid = false;
+        }
+
+        if (!isValid)
+        {
+            ShouldShake = true;
+            return;
+        }
+
+        await PerformServerRegister();
+    }
+
+    private async Task PerformServerRegister()
+    {
+        isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            var createDto = new UserCreateDto
+            {
+                Username = registerModel.Username,
+                Name = registerModel.Name,
+                Email = registerModel.Email,
+                Phone = registerModel.Phone,
+                BirthDate = registerModel.BirthDate,
+                Password = registerModel.Password
+            };
+
+            var (success, errorMessage, user) = await AuthService.RegisterAsync(createDto);
+
+            if (success)
+            {
+                // Успешная регистрация
+                Navigation.NavigateTo("/login");
+            }
+            else
+            {
+                // Показать ошибку от сервера
+                apiErrorMessage = errorMessage ?? "Неизвестная ошибка сервера";
+                ShouldShake = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            apiErrorMessage = $"Ошибка соединения: {ex.Message}";
+            ShouldShake = true;
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+}
+
+<style>
+    /* === Общие стили (Login + Register) === */
+    .register-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px;
+        min-height: 100vh;
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    .register-card {
+        width: 100%;
+        max-width: 800px;
+        background-color: var(--secondary-color) !important;
+        border-radius: 24px !important;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2) !important;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .register-title {
+        font-family: 'NTSomic', sans-serif;
+        font-size: 2.2rem;
+    }
+
+    .tracking-wider {
+        letter-spacing: 0.05em;
+        color: var(--header-color);
+        opacity: 0.8;
+    }
+
+    .input-wrapper {
+        position: relative;
+    }
+
+    .validation-hint-wrapper {
+        min-height: 22px;
+        padding-top: 2px;
+        padding-left: 5px;
+        transition: color 0.3s ease;
+    }
+
+    .transition-colors {
+        transition: color 0.3s ease;
+    }
+
+    /* Анимация */
+    .shake-animation {
+        animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    @@keyframes shake {
+        10%, 90% {
+            transform: translate3d(-1px, 0, 0);
+        }
+
+        20%, 80% {
+            transform: translate3d(2px, 0, 0);
+        }
+
+        30%, 50%, 70% {
+            transform: translate3d(-4px, 0, 0);
+        }
+
+        40%, 60% {
+            transform: translate3d(4px, 0, 0);
+        }
+    }
+
+    /* Инпуты */
+    .input-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #999;
+        z-index: 5;
+        transition: color 0.3s ease;
+    }
+
+    .custom-input {
+        background-color: var(--main-bg) !important;
+        color: var(--text-color) !important;
+        border: 2px solid transparent !important;
+        border-radius: 12px !important;
+        padding: 10px 15px 10px 45px !important;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+        .custom-input:focus {
+            border-color: var(--accent-color) !important;
+            box-shadow: 0 0 0 4px rgba(255, 58, 58, 0.1) !important;
+        }
+
+            .custom-input:focus + .input-icon,
+            .input-wrapper:focus-within .input-icon {
+                color: var(--accent-color);
+            }
+
+    /* Календарь */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+        cursor: pointer;
+        opacity: 0.6;
+    }
+
+        input[type="date"]::-webkit-calendar-picker-indicator:hover {
+            opacity: 1;
+        }
+
+    /* Ошибка API */
+    .api-error-wrapper {
+        min-height: 40px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Кнопка */
+    .custom-btn {
+        background-color: var(--accent-color) !important;
+        border: none !important;
+        border-radius: 50px !important;
+        padding: 12px 40px !important;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+        min-width: 200px;
+    }
+
+        .custom-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 58, 58, 0.3) !important;
+            color: var(--text-color) !important;
+        }
+
+    /* СТИЛЬ ССЫЛКИ (как в Login) */
+    .login-link {
+        color: var(--accent-color) !important;
+        font-weight: 700;
+        text-decoration: none !important;
+        margin-left: 5px;
+        position: relative;
+        transition: color 0.3s ease;
+        display: inline-block;
+    }
+
+        .login-link:hover {
+            color: var(--accent-color) !important;
+            filter: brightness(1.2);
+        }
+
+        .login-link::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            transform: scaleX(0);
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: var(--accent-color);
+            transform-origin: bottom right;
+            transition: transform 0.25s ease-out;
+        }
+
+        .login-link:hover::after {
+            transform: scaleX(1);
+            transform-origin: bottom left;
+        }
+
+    .animate-fade-in {
+        animation: fadeIn 0.3s ease-in;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>

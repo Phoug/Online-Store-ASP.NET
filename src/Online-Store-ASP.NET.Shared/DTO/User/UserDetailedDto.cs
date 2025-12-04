@@ -4,7 +4,7 @@ using Shared.DTO.Review;
 using Shared.DTO.Order;
 using Shared.DTO.Delivery;
 
-namespace Shared.DTO.User
+namespace Online_Store_ASP_NET.Shared.DTO.User
 {
     /// <summary>
     /// Полное DTO пользователя.

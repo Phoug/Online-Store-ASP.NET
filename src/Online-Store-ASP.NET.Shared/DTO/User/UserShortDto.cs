@@ -1,4 +1,4 @@
-﻿namespace Shared.DTO.User
+﻿namespace Online_Store_ASP_NET.Shared.DTO.User
 {
     public class UserShortDto
     {

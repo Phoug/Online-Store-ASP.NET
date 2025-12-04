@@ -1,9 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Shared.DTO.User
+namespace Online_Store_ASP_NET.Shared.DTO.User
 {
     public class UserUpdateDto
     {
+        [MaxLength(64)]
+        public string? Username { get; set; }
+
         [MaxLength(64)]
         public string? Name { get; set; }
 

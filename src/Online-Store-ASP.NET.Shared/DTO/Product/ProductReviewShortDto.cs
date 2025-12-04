@@ -1,4 +1,4 @@
-﻿namespace Shared.DTO.Product
+﻿namespace Online_Store_ASP_NET.Shared.DTO.Product
 {
     /// <summary>
     /// Короткое DTO отзыва, используемое внутри ProductDetailsDto.

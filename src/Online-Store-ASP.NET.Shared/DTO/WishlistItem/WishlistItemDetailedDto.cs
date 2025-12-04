@@ -1,4 +1,4 @@
-﻿using Shared.DTO.Product;
+﻿using Online_Store_ASP_NET.Shared.DTO.Product;
 using Shared.DTO.Wishlist;
 
 namespace Shared.DTO.WishlistItem

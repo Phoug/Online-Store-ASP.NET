@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Repositories.Interfaces;
-using Shared.Models;
+using Online_Store_ASP_NET.Shared.Models;
 using System.Linq.Expressions;
 
 

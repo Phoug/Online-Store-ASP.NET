@@ -1,0 +1,378 @@
+﻿@page "/account"
+@layout EmptyLayout
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.JSInterop
+@using Online_Store_ASP_NET.Shared.DTO.User
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+@using System.Net.Http.Json
+
+<div class="account-container">
+    <div class="card account-card">
+        <div class="card-header bg-transparent border-0 py-4 d-flex align-items-center">
+            <div class="avatar-circle me-3">
+                @if (!string.IsNullOrEmpty(ModelInitials))
+                {
+                    <span>@ModelInitials</span>
+                }
+            </div>
+            <div class="account-header-text">
+                <h3 class="mb-0 fw-bold account-title">Личный кабинет</h3>
+                <small class="text-muted">Управление профилем и контактами</small>
+            </div>
+        </div>
+
+        <div class="card-body px-4 pb-4 pt-2">
+            @if (isLoading)
+            {
+                <div class="d-flex justify-content-center py-4">
+                    <div class="spinner-border text-danger" role="status"></div>
+                </div>
+            }
+            else if (!string.IsNullOrEmpty(loadError))
+            {
+                <div class="alert alert-danger mb-0">@loadError</div>
+            }
+            else
+            {
+                <EditForm Model="@editModel" OnValidSubmit="@SaveProfile">
+                    <DataAnnotationsValidator />
+
+                    <div class="row g-3">
+                        <!-- Логин -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-uppercase tracking-wider">Логин</label>
+                            <input class="form-control custom-input" @bind="editModel.Username" />
+                        </div>
+
+                        <!-- ФИО -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-uppercase tracking-wider">ФИО</label>
+                            <input class="form-control custom-input" @bind="editModel.Name" />
+                        </div>
+
+                        <!-- Email -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-uppercase tracking-wider">Email</label>
+                            <input class="form-control custom-input" @bind="editModel.Email" />
+                        </div>
+
+                        <!-- Телефон -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-uppercase tracking-wider">Телефон</label>
+                            <input class="form-control custom-input" @bind="editModel.Phone" />
+                        </div>
+
+                        <!-- Дата рождения -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-uppercase tracking-wider">Дата рождения</label>
+                            <InputDate @bind-Value="editModel.BirthDate" class="form-control custom-input" />
+                        </div>
+
+                        <!-- Новый пароль -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-uppercase tracking-wider">Новый пароль</label>
+                            <input type="password" class="form-control custom-input" @bind="editModel.NewPassword" placeholder="Оставьте пустым, чтобы не менять" />
+                        </div>
+
+                        <!-- Роль -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-uppercase tracking-wider">Роль</label>
+                            <select class="form-select custom-input" @bind="editModel.Role">
+                                <option value="Customer">Покупатель</option>
+                                <option value="Admin">Администратор</option>
+                                <option value="Manager">Продавец</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(apiError))
+                    {
+                        <div class="alert alert-danger mt-3 mb-1">@apiError</div>
+                    }
+                    @if (!string.IsNullOrEmpty(successMessage))
+                    {
+                        <div class="alert alert-success mt-3 mb-1">@successMessage</div>
+                    }
+
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <button type="button" class="btn btn-outline-danger px-4 rounded-pill fw-bold" @onclick="Logout">
+                            Выйти
+                        </button>
+
+                        <button type="submit" class="btn btn-primary custom-btn px-5" disabled="@isSaving">
+                            @if (isSaving)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2"></span>
+                                <span>Сохранение...</span>
+                            }
+                            else
+                            {
+                                <span>Сохранить изменения</span>
+                            }
+                        </button>
+                    </div>
+                </EditForm>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private class AccountEditModel
+    {
+        public int Id { get; set; }
+
+        [Required]
+        public string Username { get; set; } = string.Empty;
+
+        [Required]
+        public string Name { get; set; } = string.Empty;
+
+        [Required, EmailAddress]
+        public string Email { get; set; } = string.Empty;
+
+        [Required]
+        public string Phone { get; set; } = string.Empty;
+
+        [Required]
+        public DateTime BirthDate { get; set; }
+
+        public string NewPassword { get; set; } = string.Empty;
+
+        public string Role { get; set; } = "Customer";
+    }
+
+    private AccountEditModel editModel = new();
+    private bool isLoading = true;
+    private bool isSaving = false;
+    private string loadError = "";
+    private string apiError = "";
+    private string successMessage = "";
+
+    private string ModelInitials =>
+        string.Join("", (editModel.Name ?? "")
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Take(2)
+            .Select(s => char.ToUpperInvariant(s[0])));
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var userId = await JS.InvokeAsync<string>("localStorage.getItem", "currentUserId");
+            if (string.IsNullOrEmpty(userId))
+            {
+                Navigation.NavigateTo("/login");
+                return;
+            }
+
+            if (!int.TryParse(userId, out var id))
+            {
+                Navigation.NavigateTo("/login");
+                return;
+            }
+
+            var user = await Http.GetFromJsonAsync<UserReadDto>($"user/{id}");
+            if (user == null)
+            {
+                loadError = "Пользователь не найден.";
+            }
+            else
+            {
+                editModel = new AccountEditModel
+                {
+                    Id = user.Id,
+                    Username = user.Username,
+                    Name = user.Name,
+                    Email = user.Email,
+                    Phone = user.Phone,
+                    BirthDate = user.BirthDate,
+                    Role = user.Role
+                };
+            }
+        }
+        catch (Exception ex)
+        {
+            loadError = $"Ошибка загрузки профиля: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SaveProfile()
+    {
+        apiError = "";
+        successMessage = "";
+        isSaving = true;
+
+        try
+        {
+            var dto = new UserUpdateDto
+            {
+                Username = editModel.Username,
+                Name = editModel.Name,
+                Email = editModel.Email,
+                Phone = editModel.Phone,
+                BirthDate = editModel.BirthDate,
+                Password = string.IsNullOrWhiteSpace(editModel.NewPassword) ? null : editModel.NewPassword,
+                Role = editModel.Role
+            };
+
+            var response = await Http.PutAsJsonAsync($"user/{editModel.Id}", dto);
+
+            if (response.IsSuccessStatusCode)
+            {
+                successMessage = "Профиль успешно обновлён.";
+                editModel.NewPassword = "";
+
+                // !!! ВАЖНО: Обновляем роль в localStorage !!!
+                await JS.InvokeVoidAsync("localStorage.setItem", "userRole", editModel.Role);
+
+                // Ждём секунду, чтобы юзер увидел успех, и перезагружаем страницу,
+                // чтобы MainLayout подхватил новую роль
+                await Task.Delay(1000);
+                Navigation.NavigateTo("/account", forceLoad: true);
+            }
+            else
+            {
+                var text = await response.Content.ReadAsStringAsync();
+                apiError = string.IsNullOrWhiteSpace(text) ? "Ошибка при сохранении профиля." : text;
+            }
+        }
+        catch (Exception ex)
+        {
+            apiError = $"Ошибка при сохранении профиля: {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private async Task Logout()
+    {
+        await JS.InvokeVoidAsync("localStorage.removeItem", "currentUserId");
+        await JS.InvokeVoidAsync("localStorage.removeItem", "userRole"); // Очищаем роль тоже
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
+}
+
+<style>
+    .account-container {
+        display: flex;
+        justify-content: center;
+        align-items: center; /* Центрируем по вертикали */
+        padding: 40px 20px;
+        min-height: 100vh;
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    .account-card {
+        width: 100%;
+        max-width: 900px;
+        background-color: var(--secondary-color) !important;
+        border-radius: 24px !important;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2) !important;
+        overflow: hidden;
+    }
+
+    /* Сдвиг текста от аватара */
+    .account-header-text {
+        margin-left: 12px;
+    }
+
+    .account-title {
+        color: var(--accent-color) !important; /* Красный цвет */
+        font-family: 'NTSomic', sans-serif;
+        font-size: 2rem;
+    }
+
+    .avatar-circle {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background-color: var(--accent-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-color);
+        font-weight: 700;
+        font-size: 1.5rem;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+    }
+
+    .tracking-wider {
+        letter-spacing: 0.05em;
+        color: var(--header-color);
+        opacity: 0.8;
+    }
+
+    /* Стили инпутов */
+    .custom-input {
+        background-color: var(--main-bg) !important;
+        color: var(--text-color) !important;
+        border: 2px solid transparent !important;
+        border-radius: 12px !important;
+        padding: 10px 15px !important;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+        .custom-input:focus {
+            border-color: var(--accent-color) !important;
+            box-shadow: 0 0 0 4px rgba(255, 58, 58, 0.1) !important;
+            outline: none;
+        }
+
+    /* Кнопка "Сохранить" */
+    .custom-btn {
+        background-color: var(--accent-color) !important;
+        border: none !important;
+        border-radius: 50px !important;
+        padding: 12px 40px !important;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+        min-width: 220px;
+    }
+
+        .custom-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 58, 58, 0.3) !important;
+            color: var(--text-color) !important;
+        }
+
+    /* Календарь */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+        cursor: pointer;
+        opacity: 0.6;
+    }
+
+        input[type="date"]::-webkit-calendar-picker-indicator:hover {
+            opacity: 1;
+        }
+
+    keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+</style>

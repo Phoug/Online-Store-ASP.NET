@@ -1,4 +1,4 @@
-﻿using Shared.Models;
+﻿using Online_Store_ASP_NET.Shared.Models;
 
 namespace Shared.Repositories
 {

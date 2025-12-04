@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Shared.DTO.Category
+namespace Online_Store_ASP_NET.Shared.DTO.Category
 {
     /// <summary>
     /// DTO для обновления категории.

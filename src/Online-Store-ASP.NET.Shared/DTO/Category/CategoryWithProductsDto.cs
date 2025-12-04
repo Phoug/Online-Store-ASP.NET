@@ -1,6 +1,6 @@
-﻿using Shared.DTO.Product;
+﻿using Online_Store_ASP_NET.Shared.DTO.Product;
 
-namespace Shared.DTO.Category
+namespace Online_Store_ASP_NET.Shared.DTO.Category
 {
     /// <summary>
     /// DTO для расширенного вывода категории

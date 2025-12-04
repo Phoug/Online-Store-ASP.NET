@@ -1,4 +1,4 @@
-﻿using Shared.DTO.User;
+﻿using Online_Store_ASP_NET.Shared.DTO.User;
 using Shared.DTO.WishlistItem;
 using System.Collections.Generic;
 

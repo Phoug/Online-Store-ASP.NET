@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Shared.Models;
+using Online_Store_ASP_NET.Shared.Models;
 
 namespace Infrastructure.Data
 {

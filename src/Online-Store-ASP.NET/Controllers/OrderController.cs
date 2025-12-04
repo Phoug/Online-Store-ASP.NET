@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Shared.Models;
+using Online_Store_ASP_NET.Shared.Models;
 using Services.Interfaces;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Http;

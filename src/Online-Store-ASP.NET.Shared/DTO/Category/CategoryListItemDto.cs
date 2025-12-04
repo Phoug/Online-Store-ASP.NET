@@ -1,4 +1,4 @@
-﻿namespace Shared.DTO.Category
+﻿namespace Online_Store_ASP_NET.Shared.DTO.Category
 {
     /// <summary>
     /// Краткая информация о категории.

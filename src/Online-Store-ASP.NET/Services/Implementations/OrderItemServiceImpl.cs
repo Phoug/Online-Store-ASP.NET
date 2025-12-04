@@ -1,6 +1,6 @@
 ﻿using Services.Interfaces;
 using Repositories.Interfaces;
-using Shared.Models;
+using Online_Store_ASP_NET.Shared.Models;
 
 namespace Services.Implementations
 {

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Shared.DTO.Product
+namespace Online_Store_ASP_NET.Shared.DTO.Product
 {
     public class ProductReadDto
     {

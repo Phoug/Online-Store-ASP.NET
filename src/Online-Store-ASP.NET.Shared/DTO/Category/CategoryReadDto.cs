@@ -1,6 +1,6 @@
-﻿namespace Shared.DTO.Product
+﻿namespace Online_Store_ASP_NET.Shared.DTO.Product
 {
-    namespace Shared.DTO.Category
+    namespace Online_Store_ASP_NET.Shared.DTO.Category
     {
         /// <summary>
         /// DTO для отображения информации о категории.

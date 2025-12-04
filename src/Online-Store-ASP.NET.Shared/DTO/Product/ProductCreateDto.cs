@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Shared.DTO.Product
+namespace Online_Store_ASP_NET.Shared.DTO.Product
 {
     /// <summary>
     /// DTO для создания нового товара.

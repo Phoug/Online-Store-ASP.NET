@@ -1,5 +1,5 @@
 ﻿using Shared.DTO.Wishlist;
-using Shared.Models;
+using Online_Store_ASP_NET.Shared.Models;
 using Shared.Repositories;
 using Shared.Mappers;
 using System.Linq;

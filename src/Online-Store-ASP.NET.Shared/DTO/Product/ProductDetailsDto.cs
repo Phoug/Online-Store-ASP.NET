@@ -1,4 +1,4 @@
-﻿namespace Shared.DTO.Product
+﻿namespace Online_Store_ASP_NET.Shared.DTO.Product
 {
     /// <summary>
     /// Детальное DTO товара, включает категории, отзывы и рейтинг.

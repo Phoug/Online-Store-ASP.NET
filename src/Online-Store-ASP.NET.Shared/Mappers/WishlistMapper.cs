@@ -1,11 +1,11 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
-using Shared.DTO.User;
+using Online_Store_ASP_NET.Shared.DTO.User;
 using Shared.DTO.Wishlist;
 using Shared.DTO.WishlistItem;
-using Shared.DTO.Product;
+using Online_Store_ASP_NET.Shared.DTO.Product;
 using Shared.DTO.Review;
-using Shared.Models;
+using Online_Store_ASP_NET.Shared.Models;
 
 namespace Shared.Mappers
 {

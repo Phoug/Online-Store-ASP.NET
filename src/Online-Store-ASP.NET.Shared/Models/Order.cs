@@ -1,8 +1,8 @@
-﻿using Shared.Models;
+﻿using Online_Store_ASP_NET.Shared.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Shared.Models
+namespace Online_Store_ASP_NET.Shared.Models
 {
     /// <summary>
     /// Fields: Id, TotalAmount, Status, CreatedAt, UpdatedAt, UserId, User, DeliveryId, Delivery, OrderProducts

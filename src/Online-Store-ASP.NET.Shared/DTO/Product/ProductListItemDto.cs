@@ -1,4 +1,4 @@
-﻿namespace Shared.DTO.Product
+﻿namespace Online_Store_ASP_NET.Shared.DTO.Product
 {
     /// <summary>
     /// Краткое DTO продукта — используется в списках.

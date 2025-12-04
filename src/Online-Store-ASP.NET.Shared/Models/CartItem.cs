@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Shared.Models
+namespace Online_Store_ASP_NET.Shared.Models
 {
     /// <summary>
     ///  Fields: Id, Quantity, TotalPrice, CartId, Cart, ProductId, Product
